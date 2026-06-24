@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ShoppingBag, Moon, Calendar, LayoutDashboard } from 'lucide-react';
+import LogoutButton from './LogoutButton';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
@@ -29,8 +30,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Link>
           ))}
         </nav>
-        <div className="p-4 border-t">
-          <Link href="/ar" className="text-xs text-gray-400 hover:text-pink-500">← View Site</Link>
+        <div className="p-4 border-t space-y-2">
+          <Link href="/ar" className="block text-xs text-gray-400 hover:text-pink-500">← View Site</Link>
+          <LogoutButton />
         </div>
       </aside>
 

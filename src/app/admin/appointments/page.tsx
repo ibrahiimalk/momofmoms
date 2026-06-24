@@ -1,9 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { supabase, Appointment } from '@/lib/supabase';
+import { Appointment } from '@/lib/supabase';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { Check, X, Clock } from 'lucide-react';
 
 export default function AppointmentsAdmin() {
+  const supabase = createSupabaseBrowser();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
 

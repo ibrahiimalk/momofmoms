@@ -1,12 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { supabase, Product } from '@/lib/supabase';
+import { Product } from '@/lib/supabase';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { Trash2, Edit, Plus, X, Check } from 'lucide-react';
 import Image from 'next/image';
 
 const EMPTY_FORM = { name_ar: '', name_en: '', price: '', category: '', image_url: '', in_stock: true };
 
 export default function ProductsAdmin() {
+  const supabase = createSupabaseBrowser();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

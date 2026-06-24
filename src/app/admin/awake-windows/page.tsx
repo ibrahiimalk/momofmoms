@@ -1,12 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { supabase, AwakeWindow } from '@/lib/supabase';
+import { AwakeWindow } from '@/lib/supabase';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { Trash2, Edit, Plus, X, Check, GripVertical } from 'lucide-react';
 import Image from 'next/image';
 
 const EMPTY = { label_ar: '', label_en: '', image_url: '', order_index: 0 };
 
 export default function AwakeWindowsAdmin() {
+  const supabase = createSupabaseBrowser();
   const [items, setItems] = useState<AwakeWindow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
