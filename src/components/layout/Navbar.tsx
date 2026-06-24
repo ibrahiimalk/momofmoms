@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { Locale, translations } from '@/lib/i18n';
 import { ShoppingBag, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 export default function Navbar({ locale }: { locale: Locale }) {
   const t = translations[locale].nav;
@@ -59,6 +60,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
             <Link href="/admin" className="p-2 hover:bg-pink-50 rounded-full">
               <User size={20} className="text-gray-600" />
             </Link>
+            <ThemeToggle />
             <button className="md:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
