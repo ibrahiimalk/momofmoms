@@ -20,9 +20,9 @@ export default function LocaleLayout({
   const isRTL = locale === 'ar';
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'font-arabic' : ''}>
+    <div dir={isRTL ? 'rtl' : 'ltr'} className={`bg-white ${isRTL ? 'font-arabic' : ''}`} style={{ backgroundColor: '#ffffff' }}>
       <Navbar locale={locale} />
-      <main className="min-h-screen">{children}</main>
+      <main className="min-h-screen bg-white" style={{ backgroundColor: '#ffffff' }}>{children}</main>
       <Footer locale={locale} />
     </div>
   );

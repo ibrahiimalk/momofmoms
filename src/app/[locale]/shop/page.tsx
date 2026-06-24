@@ -19,7 +19,7 @@ export default async function ShopPage({ params }: { params: { locale: string } 
   const products = await getProducts();
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'} className="max-w-7xl mx-auto px-4 py-10">
+    <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen bg-white max-w-7xl mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">{t.shop.title}</h1>
       <p className="text-gray-500 mb-8">
         {locale === 'ar' ? `${products.length} منتج` : `${products.length} products`}
