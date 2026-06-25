@@ -175,10 +175,8 @@ export default async function HomePage({ params }: { params: { locale: string } 
             <div className="text-center mt-10">
               <Link
                 href={`/${locale}/shop`}
-                className="inline-block px-8 py-3 rounded-full font-semibold border-2 transition-colors hover:text-white"
+                className="inline-block px-8 py-3 rounded-full font-semibold border-2 transition-colors hover:bg-pink-600 hover:text-white hover:border-pink-600"
                 style={{ borderColor: '#BB5E86', color: '#BB5E86' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#BB5E86')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 {locale === 'ar' ? 'عرض جميع المنتجات' : 'View All Products'}
               </Link>
