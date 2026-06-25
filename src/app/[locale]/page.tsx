@@ -25,111 +25,135 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
   const featureCards = [
     {
-      href: `/${locale}/awake-windows`,
-      label: t.home.awakeWindows,
-      emoji: '🌅',
-      bg: 'bg-amber-50',
-      border: 'border-amber-200',
-      desc: locale === 'ar' ? 'نوافذ اليقظة حسب عمر طفلك' : "Baby awake windows by age",
-    },
-    {
       href: `/${locale}/pregnancy-calculator`,
       label: t.home.pregnancyCalc,
-      emoji: '🗓️',
+      icon: '🗓️',
       bg: 'bg-blue-50',
-      border: 'border-blue-200',
+      border: 'border-blue-100',
       desc: locale === 'ar' ? 'احسبي موعد الولادة المتوقع' : 'Calculate your due date',
     },
     {
       href: `/${locale}/book-appointment`,
       label: t.home.bookAppointment,
-      emoji: '📅',
+      icon: '📅',
       bg: 'bg-purple-50',
-      border: 'border-purple-200',
+      border: 'border-purple-100',
       desc: locale === 'ar' ? 'احجزي موعدك الآن' : 'Book your session now',
+    },
+    {
+      href: `/${locale}/awake-windows`,
+      label: t.home.awakeWindows,
+      icon: '🌅',
+      bg: 'bg-amber-50',
+      border: 'border-amber-100',
+      desc: locale === 'ar' ? 'نوافذ اليقظة حسب عمر طفلك' : 'Baby awake windows by age',
     },
     {
       href: `/${locale}/shop`,
       label: t.home.shopDiapers,
-      emoji: '🛍️',
+      icon: '🛍️',
       bg: 'bg-pink-50',
-      border: 'border-pink-200',
+      border: 'border-pink-100',
       desc: locale === 'ar' ? 'تسوقي قماط وملابس الأطفال' : 'Shop diapers & baby clothes',
     },
   ];
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'}>
+    <div dir={isRTL ? 'rtl' : 'ltr'} style={{ background: '#FDF8F4' }}>
+
       {/* Hero */}
-      <section className="bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="text-6xl mb-4">👶</div>
-          <h1 className="text-4xl md:text-5xl font-bold text-pink-700 mb-4">{t.home.hero}</h1>
-          <p className="text-lg text-gray-600 mb-8">{t.home.heroSub}</p>
-          <Link
-            href={`/${locale}/shop`}
-            className="inline-block bg-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-pink-600 transition-colors shadow-md"
-          >
-            {t.home.shopDiapers}
-          </Link>
+      <section className="min-h-[85vh] flex items-center px-6 py-16" style={{ background: 'linear-gradient(135deg, #FDF8F4 0%, #FAF0F5 50%, #FDF8F4 100%)' }}>
+        <div className="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+
+          {/* Left: Text */}
+          <div className={isRTL ? 'text-right' : 'text-left'}>
+            {/* Badge */}
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}
+              style={{ background: '#FAE0EC', color: '#BB5E86' }}>
+              <span className="w-2 h-2 rounded-full inline-block" style={{ background: '#BB5E86' }} />
+              {t.home.heroBadge}
+            </div>
+
+            {/* Heading */}
+            <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6" style={{ fontFamily: 'Georgia, serif', color: '#2D1B20' }}>
+              {t.home.heroHeading1}
+              <br />
+              <span className="italic" style={{ color: '#C4768A' }}>{t.home.heroHeading2}</span>
+            </h1>
+
+            {/* Description */}
+            <p className="text-lg mb-8 leading-relaxed" style={{ color: '#7A6068' }}>
+              {t.home.heroDesc}
+            </p>
+
+            {/* CTAs */}
+            <div className={`flex gap-4 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <Link
+                href={`/${locale}/book-appointment`}
+                className="px-7 py-3 rounded-full font-semibold text-white transition-opacity hover:opacity-90 shadow-md"
+                style={{ background: '#BB5E86' }}
+              >
+                {t.home.heroBook}
+              </Link>
+              <Link
+                href={`/${locale}/pregnancy-calculator`}
+                className="px-7 py-3 rounded-full font-semibold border-2 transition-colors hover:bg-pink-50"
+                style={{ borderColor: '#BB5E86', color: '#BB5E86' }}
+              >
+                {t.home.heroCalc}
+              </Link>
+            </div>
+          </div>
+
+          {/* Right: Illustration Card */}
+          <div className="relative flex justify-center">
+            {/* Soft background blobs */}
+            <div className="absolute w-72 h-72 rounded-full opacity-30 blur-3xl" style={{ background: '#FAE0EC', top: '-20px', right: '0' }} />
+            <div className="absolute w-48 h-48 rounded-full opacity-20 blur-2xl" style={{ background: '#F2D873', bottom: '0', left: '20px' }} />
+
+            {/* Card */}
+            <div className="relative bg-white rounded-3xl shadow-xl p-8 w-72 flex flex-col items-center">
+              {/* Due date badge */}
+              <div className="self-start mb-4 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background: '#FAF5FF', color: '#7C3AED' }}>
+                <div className="uppercase tracking-wide opacity-70 text-[10px]">{t.home.estimatedDue}</div>
+                <div className="text-base font-bold mt-0.5" style={{ color: '#BB5E86' }}>Jan 21, 2027</div>
+              </div>
+
+              {/* Illustration placeholder */}
+              <div className="w-48 h-56 flex items-center justify-center rounded-2xl"
+                style={{ background: 'linear-gradient(180deg, #FBE4D2 0%, #FAE0EC 100%)' }}>
+                <span className="text-8xl">🤰</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Feature Cards Grid */}
-      <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Top row: 2 cards side by side */}
-          <Link
-            href={featureCards[0].href}
-            className={`${featureCards[0].bg} ${featureCards[0].border} border-2 rounded-2xl p-8 flex items-center gap-6 hover:shadow-lg transition-shadow group`}
-          >
-            <div className="text-6xl">{featureCards[0].emoji}</div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-800 group-hover:text-pink-600 transition-colors">{featureCards[0].label}</h2>
-              <p className="text-gray-500 text-sm mt-1">{featureCards[0].desc}</p>
-            </div>
-          </Link>
-
-          <Link
-            href={featureCards[1].href}
-            className={`${featureCards[1].bg} ${featureCards[1].border} border-2 rounded-2xl p-8 flex items-center gap-6 hover:shadow-lg transition-shadow group`}
-          >
-            <div className="text-6xl">{featureCards[1].emoji}</div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-800 group-hover:text-pink-600 transition-colors">{featureCards[1].label}</h2>
-              <p className="text-gray-500 text-sm mt-1">{featureCards[1].desc}</p>
-            </div>
-          </Link>
-
-          {/* Bottom row: wide card + tall card */}
-          <Link
-            href={featureCards[2].href}
-            className={`${featureCards[2].bg} ${featureCards[2].border} border-2 rounded-2xl p-8 flex items-center gap-6 hover:shadow-lg transition-shadow group`}
-          >
-            <div className="text-6xl">{featureCards[2].emoji}</div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-800 group-hover:text-pink-600 transition-colors">{featureCards[2].label}</h2>
-              <p className="text-gray-500 text-sm mt-1">{featureCards[2].desc}</p>
-            </div>
-          </Link>
-
-          <Link
-            href={featureCards[3].href}
-            className={`${featureCards[3].bg} ${featureCards[3].border} border-2 rounded-2xl p-8 flex items-center gap-6 hover:shadow-lg transition-shadow group`}
-          >
-            <div className="text-6xl">{featureCards[3].emoji}</div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-800 group-hover:text-pink-600 transition-colors">{featureCards[3].label}</h2>
-              <p className="text-gray-500 text-sm mt-1">{featureCards[3].desc}</p>
-            </div>
-          </Link>
+      {/* Feature Cards */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {featureCards.map((card) => (
+            <Link
+              key={card.href}
+              href={card.href}
+              className={`${card.bg} ${card.border} border rounded-2xl p-6 flex flex-col gap-3 hover:shadow-md transition-shadow group`}
+            >
+              <span className="text-4xl">{card.icon}</span>
+              <div>
+                <h2 className="font-semibold text-gray-800 group-hover:text-pink-600 transition-colors" style={{ fontFamily: 'Georgia, serif' }}>
+                  {card.label}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">{card.desc}</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
       {/* Featured Products */}
-      <section className="bg-gray-50 py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
+      <section className="px-6 py-16" style={{ background: '#FDF0F5' }}>
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-10" style={{ fontFamily: 'Georgia, serif', color: '#2D1B20' }}>
             {t.home.babyClothes}
           </h2>
           {products.length > 0 ? (
@@ -145,16 +169,16 @@ export default async function HomePage({ params }: { params: { locale: string } 
               <p className="text-gray-500">
                 {locale === 'ar' ? 'لا توجد منتجات بعد. أضف منتجات من لوحة التحكم.' : 'No products yet. Add products from the dashboard.'}
               </p>
-              <Link href="/admin/products" className="mt-4 inline-block text-pink-500 underline text-sm">
-                {locale === 'ar' ? 'إدارة المنتجات' : 'Manage Products'}
-              </Link>
             </div>
           )}
           {products.length > 0 && (
-            <div className="text-center mt-8">
+            <div className="text-center mt-10">
               <Link
                 href={`/${locale}/shop`}
-                className="inline-block border-2 border-pink-500 text-pink-500 px-8 py-3 rounded-full font-semibold hover:bg-pink-500 hover:text-white transition-colors"
+                className="inline-block px-8 py-3 rounded-full font-semibold border-2 transition-colors hover:text-white"
+                style={{ borderColor: '#BB5E86', color: '#BB5E86' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#BB5E86')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 {locale === 'ar' ? 'عرض جميع المنتجات' : 'View All Products'}
               </Link>

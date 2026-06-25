@@ -4,7 +4,6 @@ import { usePathname } from 'next/navigation';
 import { Locale, translations } from '@/lib/i18n';
 import { ShoppingBag, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import ThemeToggle from '@/components/ui/ThemeToggle';
 
 export default function Navbar({ locale }: { locale: Locale }) {
   const t = translations[locale].nav;
@@ -15,53 +14,62 @@ export default function Navbar({ locale }: { locale: Locale }) {
   const otherLocalePath = pathname.replace(`/${locale}`, `/${otherLocale}`);
 
   const links = [
-    { href: `/${locale}`, label: t.home },
-    { href: `/${locale}/shop`, label: t.shop },
-    { href: `/${locale}/awake-windows`, label: t.awakeWindows },
-    { href: `/${locale}/book-appointment`, label: t.bookAppointment },
     { href: `/${locale}/pregnancy-calculator`, label: t.pregnancyCalc },
+    { href: `/${locale}/book-appointment`, label: t.bookAppointment },
+    { href: `/${locale}/awake-windows`, label: t.awakeWindows },
+    { href: `/${locale}/shop`, label: t.shop },
   ];
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50" dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="sticky top-0 z-50 border-b" style={{ background: '#FFFFFF', borderColor: '#F5E8EE' }} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
+
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center gap-2">
-            <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
-              <span className="text-xl">👶</span>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
+              style={{ background: '#FAE0EC' }}>
+              👶
             </div>
-            <span className="font-bold text-pink-600 text-lg hidden sm:block">MomOfMoms</span>
+            <span className="font-bold text-lg" style={{ fontFamily: 'Georgia, serif', color: '#BB5E86' }}>
+              MomOfMoms
+            </span>
           </Link>
 
           {/* Desktop nav links */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-8">
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-pink-500 ${
-                  pathname === link.href ? 'text-pink-600 border-b-2 border-pink-500 pb-1' : 'text-gray-700'
-                }`}
+                className="text-sm font-medium transition-colors"
+                style={{
+                  color: pathname === link.href ? '#BB5E86' : '#5C4048',
+                  borderBottom: pathname === link.href ? '2px solid #BB5E86' : '2px solid transparent',
+                  paddingBottom: '2px',
+                }}
               >
                 {link.label}
               </Link>
             ))}
           </div>
 
-          {/* Right icons */}
-          <div className="flex items-center gap-3">
-            <Link href={otherLocalePath} className="text-xs font-semibold border border-gray-300 rounded px-2 py-1 hover:bg-gray-50">
+          {/* Right actions */}
+          <div className="flex items-center gap-2">
+            <Link
+              href={otherLocalePath}
+              className="text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors hover:bg-pink-50"
+              style={{ borderColor: '#E8C8D8', color: '#BB5E86' }}
+            >
               {otherLocale === 'ar' ? 'ع' : 'EN'}
             </Link>
-            <Link href={`/${locale}/shop`} className="p-2 hover:bg-pink-50 rounded-full">
-              <ShoppingBag size={20} className="text-gray-600" />
+            <Link href={`/${locale}/shop`} className="p-2 rounded-full transition-colors hover:bg-pink-50">
+              <ShoppingBag size={18} style={{ color: '#5C4048' }} />
             </Link>
-            <Link href="/admin" className="p-2 hover:bg-pink-50 rounded-full">
-              <User size={20} className="text-gray-600" />
+            <Link href="/admin" className="p-2 rounded-full transition-colors hover:bg-pink-50">
+              <User size={18} style={{ color: '#5C4048' }} />
             </Link>
-            <ThemeToggle />
-            <button className="md:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
+            <button className="md:hidden p-2 rounded-full hover:bg-pink-50" onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
@@ -70,12 +78,13 @@ export default function Navbar({ locale }: { locale: Locale }) {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden bg-white border-t px-4 py-3 flex flex-col gap-3" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="md:hidden border-t px-6 py-4 flex flex-col gap-4" style={{ background: '#FDF8F4', borderColor: '#F5E8EE' }}>
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-gray-700 hover:text-pink-500 py-1"
+              className="text-sm font-medium py-1"
+              style={{ color: pathname === link.href ? '#BB5E86' : '#5C4048' }}
               onClick={() => setMenuOpen(false)}
             >
               {link.label}
