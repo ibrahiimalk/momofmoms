@@ -27,15 +27,19 @@ export default function Navbar({ locale }: { locale: Locale }) {
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link href={`/${locale}`} className="flex items-center">
-            <Image
-              src="/hero-2.png"
-              alt="MomOfMoms"
-              width={160}
-              height={56}
-              className="object-contain h-14 w-auto"
-              priority
-            />
+          <Link href={`/${locale}`} className="flex items-center gap-2">
+            <div className="relative w-9 h-9 overflow-hidden rounded-full flex-shrink-0"
+              style={{ background: '#FAE0EC' }}>
+              <Image
+                src="/hero-1.png"
+                alt=""
+                fill
+                className="object-cover object-top scale-[2] translate-y-[10%]"
+              />
+            </div>
+            <span className="font-bold text-lg" style={{ fontFamily: 'Georgia, serif', color: '#BB5E86' }}>
+              MomOfMoms
+            </span>
           </Link>
 
           {/* Desktop nav links */}
