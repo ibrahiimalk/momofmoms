@@ -102,8 +102,7 @@ export default function HomeCalcWidget({ locale, content }: { locale: Locale; co
                   </div>
                   <p className="text-sm mt-3" style={{ color: '#7A6068' }}>
                     <span className="w-2 h-2 rounded-full inline-block mr-2" style={{ background: '#BB5E86' }} />
-                    {isRTL
-                      `${isRTL ? 'حوالي' : 'About'} ${result.weeksLeft} ${c['calc.weeksLeft']}`
+                    {`${isRTL ? 'حوالي' : 'About'} ${result.weeksLeft} ${c['calc.weeksLeft']}`}
                   </p>
                 </div>
                 <Link
