@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Locale, translations } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 import ProductCard from '@/components/ui/ProductCard';
+import HomeCalcWidget from '@/components/ui/HomeCalcWidget';
 
 async function getFeaturedProducts() {
   try {
@@ -27,35 +28,52 @@ export default async function HomePage({ params }: { params: { locale: string } 
   const featureCards = [
     {
       href: `/${locale}/pregnancy-calculator`,
-      label: t.home.pregnancyCalc,
-      icon: '🗓️',
-      bg: 'bg-blue-50',
-      border: 'border-blue-100',
-      desc: locale === 'ar' ? 'احسبي موعد الولادة المتوقع' : 'Calculate your due date',
+      label: locale === 'ar' ? 'حاسبة الحمل' : 'Pregnancy calculator',
+      iconBg: '#F5EDE0',
+      iconColor: '#C8956A',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="7" cy="7" r="2.5" fill="currentColor"/>
+          <circle cx="15" cy="7" r="2.5" fill="currentColor"/>
+          <circle cx="7" cy="15" r="2.5" fill="currentColor"/>
+          <circle cx="15" cy="15" r="2.5" fill="currentColor"/>
+        </svg>
+      ),
+      desc: locale === 'ar'
+        ? 'اكتشفي موعد ولادتك، أسبوع حملك والثلث الحالي — ثم تابعي طفلكِ أسبوعاً بأسبوع.'
+        : 'Find your due date, current week and trimester in a tap — then follow your baby week by week.',
+      link: locale === 'ar' ? 'احسبي الآن ←' : 'Calculate now →',
     },
     {
       href: `/${locale}/book-appointment`,
-      label: t.home.bookAppointment,
-      icon: '📅',
-      bg: 'bg-purple-50',
-      border: 'border-purple-100',
-      desc: locale === 'ar' ? 'احجزي موعدك الآن' : 'Book your session now',
-    },
-    {
-      href: `/${locale}/awake-windows`,
-      label: t.home.awakeWindows,
-      icon: '🌅',
-      bg: 'bg-amber-50',
-      border: 'border-amber-100',
-      desc: locale === 'ar' ? 'نوافذ اليقظة حسب عمر طفلك' : 'Baby awake windows by age',
+      label: locale === 'ar' ? 'احجزي موعداً' : 'Book an appointment',
+      iconBg: '#FAE0EC',
+      iconColor: '#BB5E86',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2.5" fill="none"/>
+          <circle cx="11" cy="11" r="3" fill="currentColor"/>
+        </svg>
+      ),
+      desc: locale === 'ar'
+        ? 'زيارات هادئة مع قابلات قانونيات وخبراء الرضاعة وأطباء الأطفال — في أوقات تناسبكِ.'
+        : 'Unhurried visits with midwives, lactation experts and pediatricians — at times that fit your life.',
+      link: locale === 'ar' ? 'تحققي من المواعيد ←' : 'See availability →',
     },
     {
       href: `/${locale}/shop`,
-      label: t.home.shopDiapers,
-      icon: '🛍️',
-      bg: 'bg-pink-50',
-      border: 'border-pink-100',
-      desc: locale === 'ar' ? 'تسوقي قماط وملابس الأطفال' : 'Shop diapers & baby clothes',
+      label: locale === 'ar' ? 'المتجر الصغير' : 'The little shop',
+      iconBg: '#F5EDD0',
+      iconColor: '#B08A30',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M11 2L20 11L11 20L2 11Z" fill="currentColor"/>
+        </svg>
+      ),
+      desc: locale === 'ar'
+        ? 'مجموعة صغيرة ومختارة بعناية من الأساسيات للأم والطفل — لا شيء لا تحتاجينه.'
+        : 'A small, carefully chosen collection of essentials for mother and baby — nothing you don\'t need.',
+      link: locale === 'ar' ? 'تصفحي المتجر ←' : 'Browse the shop →',
     },
   ];
 
@@ -148,24 +166,35 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
       {/* Feature Cards */}
       <section className="max-w-6xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {featureCards.map((card) => (
             <Link
               key={card.href}
               href={card.href}
-              className={`${card.bg} ${card.border} border rounded-2xl p-6 flex flex-col gap-3 hover:shadow-md transition-shadow group`}
+              className="bg-white rounded-3xl p-7 flex flex-col gap-5 hover:shadow-lg transition-shadow group border"
+              style={{ borderColor: '#F0E8EC' }}
             >
-              <span className="text-4xl">{card.icon}</span>
-              <div>
-                <h2 className="font-semibold text-gray-800 group-hover:text-pink-600 transition-colors" style={{ fontFamily: 'Georgia, serif' }}>
+              {/* Icon */}
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: card.iconBg, color: card.iconColor }}>
+                {card.icon}
+              </div>
+              {/* Text */}
+              <div className="flex flex-col gap-2 flex-1">
+                <h2 className="text-lg font-bold" style={{ fontFamily: 'Georgia, serif', color: '#2D1B20' }}>
                   {card.label}
                 </h2>
-                <p className="text-sm text-gray-500 mt-1">{card.desc}</p>
+                <p className="text-sm leading-relaxed" style={{ color: '#7A6068' }}>{card.desc}</p>
               </div>
+              {/* Link */}
+              <span className="text-sm font-semibold" style={{ color: '#BB5E86' }}>{card.link}</span>
             </Link>
           ))}
         </div>
       </section>
+
+      {/* Pregnancy Calculator Widget */}
+      <HomeCalcWidget locale={locale} />
 
       {/* Featured Products */}
       <section className="px-6 py-16" style={{ background: '#FDF0F5' }}>
