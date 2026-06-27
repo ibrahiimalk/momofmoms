@@ -132,12 +132,12 @@ export default async function HomePage({ params }: { params: { locale: string } 
               style={{ width: '320px', height: '420px', background: 'linear-gradient(180deg, #FEF3F8 0%, #FAE4EF 100%)' }}>
 
               <Image
-                src="/hero-1.png"
+                src="/portrait.png"
                 alt="MomOfMoms illustration"
-                width={280}
-                height={400}
-                className="object-contain object-bottom"
-                style={{ maxHeight: '95%', width: 'auto' }}
+                width={300}
+                height={380}
+                className="object-contain"
+                style={{ maxHeight: '100%', width: 'auto' }}
                 priority
               />
             </div>
