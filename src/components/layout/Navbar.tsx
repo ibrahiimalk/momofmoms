@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Locale, translations } from '@/lib/i18n';
 import { ShoppingBag, User, Menu, X } from 'lucide-react';
@@ -28,14 +27,9 @@ export default function Navbar({ locale }: { locale: Locale }) {
 
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center gap-2">
-            <div className="relative w-9 h-9 overflow-hidden rounded-full flex-shrink-0"
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
               style={{ background: '#FAE0EC' }}>
-              <Image
-                src="/hero-1.png"
-                alt=""
-                fill
-                className="object-cover object-top scale-[2] translate-y-[10%]"
-              />
+              👶
             </div>
             <span className="font-bold text-lg" style={{ fontFamily: 'Georgia, serif', color: '#BB5E86' }}>
               MomOfMoms

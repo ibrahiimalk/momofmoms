@@ -132,9 +132,9 @@ export default async function HomePage({ params }: { params: { locale: string } 
               {/* Woman illustration — sits above and inside the card */}
               <div className="absolute top-0 left-0 right-0 flex justify-center z-10">
                 <Image
-                  src="/hero-1.png"
+                  src="/hero-2.png"
                   alt="MomOfMoms illustration"
-                  width={220}
+                  width={280}
                   height={420}
                   className="object-contain object-top"
                   priority
