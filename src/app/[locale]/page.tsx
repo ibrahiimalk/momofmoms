@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Locale, translations } from '@/lib/i18n';
+import { Locale } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 import { getContent } from '@/lib/content';
 import ProductCard from '@/components/ui/ProductCard';

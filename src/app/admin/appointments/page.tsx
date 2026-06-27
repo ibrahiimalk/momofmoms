@@ -15,6 +15,7 @@ export default function AppointmentsAdmin() {
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, []);
 
   const updateStatus = async (id: string, status: Appointment['status']) => {
