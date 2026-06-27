@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Locale, translations } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 import ProductCard from '@/components/ui/ProductCard';
@@ -62,13 +63,21 @@ export default async function HomePage({ params }: { params: { locale: string } 
     <div dir={isRTL ? 'rtl' : 'ltr'} style={{ background: '#FDF8F4' }}>
 
       {/* Hero */}
-      <section className="min-h-[85vh] flex items-center px-6 py-16" style={{ background: 'linear-gradient(135deg, #FDF8F4 0%, #FAF0F5 50%, #FDF8F4 100%)' }}>
+      <section className="min-h-[90vh] flex items-center px-6 py-16 overflow-hidden relative"
+        style={{ background: 'linear-gradient(160deg, #FDF8F4 0%, #FAF0F5 60%, #FDF8F4 100%)' }}>
+
+        {/* Background blobs */}
+        <div className="absolute w-[500px] h-[500px] rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, #FAE0EC 0%, transparent 70%)', top: '-100px', right: isRTL ? 'auto' : '-100px', left: isRTL ? '-100px' : 'auto', opacity: 0.5 }} />
+        <div className="absolute w-[300px] h-[300px] rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, #F2D873 0%, transparent 70%)', bottom: '0', left: isRTL ? 'auto' : '10%', right: isRTL ? '10%' : 'auto', opacity: 0.25 }} />
+
         <div className="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
 
-          {/* Left: Text */}
-          <div className={isRTL ? 'text-right' : 'text-left'}>
+          {/* Text side */}
+          <div className={`relative z-10 ${isRTL ? 'text-right order-2 md:order-2' : 'text-left order-2 md:order-1'}`}>
             {/* Badge */}
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6`}
               style={{ background: '#FAE0EC', color: '#BB5E86' }}>
               <span className="w-2 h-2 rounded-full inline-block" style={{ background: '#BB5E86' }} />
               {t.home.heroBadge}
@@ -78,54 +87,68 @@ export default async function HomePage({ params }: { params: { locale: string } 
             <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6" style={{ fontFamily: 'Georgia, serif', color: '#2D1B20' }}>
               {t.home.heroHeading1}
               <br />
-              <span className="italic" style={{ color: '#C4768A' }}>{t.home.heroHeading2}</span>
+              <em style={{ color: '#C4768A', fontStyle: 'italic' }}>{t.home.heroHeading2}</em>
             </h1>
 
             {/* Description */}
-            <p className="text-lg mb-8 leading-relaxed" style={{ color: '#7A6068' }}>
+            <p className="text-lg mb-10 leading-relaxed max-w-md" style={{ color: '#7A6068' }}>
               {t.home.heroDesc}
             </p>
 
             {/* CTAs */}
-            <div className={`flex gap-4 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex gap-4 flex-wrap ${isRTL ? 'justify-end' : 'justify-start'}`}>
               <Link
                 href={`/${locale}/book-appointment`}
-                className="px-7 py-3 rounded-full font-semibold text-white transition-opacity hover:opacity-90 shadow-md"
+                className="px-8 py-3.5 rounded-full font-semibold text-white transition-opacity hover:opacity-90 shadow-md text-base"
                 style={{ background: '#BB5E86' }}
               >
                 {t.home.heroBook}
               </Link>
               <Link
                 href={`/${locale}/pregnancy-calculator`}
-                className="px-7 py-3 rounded-full font-semibold border-2 transition-colors hover:bg-pink-50"
-                style={{ borderColor: '#BB5E86', color: '#BB5E86' }}
+                className="px-8 py-3.5 rounded-full font-semibold border-2 transition-colors hover:bg-pink-50 text-base"
+                style={{ borderColor: '#BB5E86', color: '#BB5E86', background: 'white' }}
               >
                 {t.home.heroCalc}
               </Link>
             </div>
           </div>
 
-          {/* Right: Illustration Card */}
-          <div className="relative flex justify-center">
-            {/* Soft background blobs */}
-            <div className="absolute w-72 h-72 rounded-full opacity-30 blur-3xl" style={{ background: '#FAE0EC', top: '-20px', right: '0' }} />
-            <div className="absolute w-48 h-48 rounded-full opacity-20 blur-2xl" style={{ background: '#F2D873', bottom: '0', left: '20px' }} />
-
-            {/* Card */}
-            <div className="relative bg-white rounded-3xl shadow-xl p-8 w-72 flex flex-col items-center">
-              {/* Due date badge */}
-              <div className="self-start mb-4 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background: '#FAF5FF', color: '#7C3AED' }}>
-                <div className="uppercase tracking-wide opacity-70 text-[10px]">{t.home.estimatedDue}</div>
-                <div className="text-base font-bold mt-0.5" style={{ color: '#BB5E86' }}>Jan 21, 2027</div>
+          {/* Illustration side */}
+          <div className={`relative flex justify-center items-end ${isRTL ? 'order-1 md:order-1' : 'order-1 md:order-2'}`}>
+            {/* Due date badge — floats top-left of card */}
+            <div className="absolute top-4 z-20"
+              style={{ [isRTL ? 'right' : 'left']: '-10px' }}>
+              <div className="bg-white rounded-2xl shadow-lg px-4 py-3 min-w-[140px]">
+                <div className="uppercase tracking-widest text-[10px] font-semibold mb-0.5" style={{ color: '#A08090' }}>
+                  {t.home.estimatedDue}
+                </div>
+                <div className="text-lg font-bold" style={{ color: '#BB5E86' }}>Jan 21, 2027</div>
               </div>
+            </div>
 
-              {/* Illustration placeholder */}
-              <div className="w-48 h-56 flex items-center justify-center rounded-2xl"
-                style={{ background: 'linear-gradient(180deg, #FBE4D2 0%, #FAE0EC 100%)' }}>
-                <span className="text-8xl">🤰</span>
+            {/* White card */}
+            <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden"
+              style={{ width: '300px', height: '420px' }}>
+
+              {/* Soft gradient inside card */}
+              <div className="absolute inset-0"
+                style={{ background: 'linear-gradient(180deg, #FDF8F4 0%, #FAE0EC 100%)', opacity: 0.4 }} />
+
+              {/* Woman illustration — overflows the top of the card */}
+              <div className="absolute bottom-0 left-0 right-0 flex justify-center">
+                <Image
+                  src="/hero-1.png"
+                  alt="MomOfMoms illustration"
+                  width={260}
+                  height={420}
+                  className="object-contain object-bottom"
+                  priority
+                />
               </div>
             </div>
           </div>
+
         </div>
       </section>
 
