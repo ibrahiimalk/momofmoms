@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Locale, translations } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
+import { getContent } from '@/lib/content';
 import ProductCard from '@/components/ui/ProductCard';
 import HomeCalcWidget from '@/components/ui/HomeCalcWidget';
 
@@ -22,13 +23,14 @@ async function getFeaturedProducts() {
 export default async function HomePage({ params }: { params: { locale: string } }) {
   const locale = params.locale as Locale;
   const t = translations[locale];
+  const c = await getContent(locale);
   const isRTL = locale === 'ar';
   const products = await getFeaturedProducts();
 
   const featureCards = [
     {
       href: `/${locale}/pregnancy-calculator`,
-      label: locale === 'ar' ? 'حاسبة الحمل' : 'Pregnancy calculator',
+      label: c['home.card1Label'],
       iconBg: '#F5EDE0',
       iconColor: '#C8956A',
       icon: (
@@ -39,14 +41,12 @@ export default async function HomePage({ params }: { params: { locale: string } 
           <circle cx="15" cy="15" r="2.5" fill="currentColor"/>
         </svg>
       ),
-      desc: locale === 'ar'
-        ? 'اكتشفي موعد ولادتك، أسبوع حملك والثلث الحالي — ثم تابعي طفلكِ أسبوعاً بأسبوع.'
-        : 'Find your due date, current week and trimester in a tap — then follow your baby week by week.',
-      link: locale === 'ar' ? 'احسبي الآن ←' : 'Calculate now →',
+      desc: c['home.card1Desc'],
+      link: c['home.card1Link'],
     },
     {
       href: `/${locale}/book-appointment`,
-      label: locale === 'ar' ? 'احجزي موعداً' : 'Book an appointment',
+      label: c['home.card2Label'],
       iconBg: '#FAE0EC',
       iconColor: '#BB5E86',
       icon: (
@@ -55,14 +55,12 @@ export default async function HomePage({ params }: { params: { locale: string } 
           <circle cx="11" cy="11" r="3" fill="currentColor"/>
         </svg>
       ),
-      desc: locale === 'ar'
-        ? 'زيارات هادئة مع قابلات قانونيات وخبراء الرضاعة وأطباء الأطفال — في أوقات تناسبكِ.'
-        : 'Unhurried visits with midwives, lactation experts and pediatricians — at times that fit your life.',
-      link: locale === 'ar' ? 'تحققي من المواعيد ←' : 'See availability →',
+      desc: c['home.card2Desc'],
+      link: c['home.card2Link'],
     },
     {
       href: `/${locale}/shop`,
-      label: locale === 'ar' ? 'المتجر الصغير' : 'The little shop',
+      label: c['home.card3Label'],
       iconBg: '#F5EDD0',
       iconColor: '#B08A30',
       icon: (
@@ -70,10 +68,8 @@ export default async function HomePage({ params }: { params: { locale: string } 
           <path d="M11 2L20 11L11 20L2 11Z" fill="currentColor"/>
         </svg>
       ),
-      desc: locale === 'ar'
-        ? 'مجموعة صغيرة ومختارة بعناية من الأساسيات للأم والطفل — لا شيء لا تحتاجينه.'
-        : 'A small, carefully chosen collection of essentials for mother and baby — nothing you don\'t need.',
-      link: locale === 'ar' ? 'تصفحي المتجر ←' : 'Browse the shop →',
+      desc: c['home.card3Desc'],
+      link: c['home.card3Link'],
     },
   ];
 
@@ -98,19 +94,19 @@ export default async function HomePage({ params }: { params: { locale: string } 
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6`}
               style={{ background: '#FAE0EC', color: '#BB5E86' }}>
               <span className="w-2 h-2 rounded-full inline-block" style={{ background: '#BB5E86' }} />
-              {t.home.heroBadge}
+              {c['home.heroBadge']}
             </div>
 
             {/* Heading */}
             <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6" style={{ fontFamily: 'Georgia, serif', color: '#2D1B20' }}>
-              {t.home.heroHeading1}
+              {c['home.heroHeading1']}
               <br />
-              <em style={{ color: '#C4768A', fontStyle: 'italic' }}>{t.home.heroHeading2}</em>
+              <em style={{ color: '#C4768A', fontStyle: 'italic' }}>{c['home.heroHeading2']}</em>
             </h1>
 
             {/* Description */}
             <p className="text-lg mb-10 leading-relaxed max-w-md" style={{ color: '#7A6068' }}>
-              {t.home.heroDesc}
+              {c['home.heroDesc']}
             </p>
 
             {/* CTAs */}
@@ -120,14 +116,14 @@ export default async function HomePage({ params }: { params: { locale: string } 
                 className="px-8 py-3.5 rounded-full font-semibold text-white transition-opacity hover:opacity-90 shadow-md text-base"
                 style={{ background: '#BB5E86' }}
               >
-                {t.home.heroBook}
+                {c['home.heroBook']}
               </Link>
               <Link
                 href={`/${locale}/pregnancy-calculator`}
                 className="px-8 py-3.5 rounded-full font-semibold border-2 transition-colors hover:bg-pink-50 text-base"
                 style={{ borderColor: '#BB5E86', color: '#BB5E86', background: 'white' }}
               >
-                {t.home.heroCalc}
+                {c['home.heroCalc']}
               </Link>
             </div>
           </div>
@@ -139,7 +135,7 @@ export default async function HomePage({ params }: { params: { locale: string } 
               style={{ [isRTL ? 'right' : 'left']: '-10px' }}>
               <div className="bg-white rounded-2xl shadow-lg px-4 py-3 min-w-[140px]">
                 <div className="uppercase tracking-widest text-[10px] font-semibold mb-0.5" style={{ color: '#A08090' }}>
-                  {t.home.estimatedDue}
+                  {c['home.estimatedDue']}
                 </div>
                 <div className="text-lg font-bold" style={{ color: '#BB5E86' }}>Jan 21, 2027</div>
               </div>
@@ -194,13 +190,13 @@ export default async function HomePage({ params }: { params: { locale: string } 
       </section>
 
       {/* Pregnancy Calculator Widget */}
-      <HomeCalcWidget locale={locale} />
+      <HomeCalcWidget locale={locale} content={c} />
 
       {/* Featured Products */}
       <section className="px-6 py-16" style={{ background: '#FDF0F5' }}>
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-10" style={{ fontFamily: 'Georgia, serif', color: '#2D1B20' }}>
-            {t.home.babyClothes}
+            {c['home.babyClothes']}
           </h2>
           {products.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

@@ -17,8 +17,9 @@ function calculatePregnancy(lmpDate: Date) {
   return { dueDate, weeks, days, trimester, weeksLeft, progress: Math.min((weeks / 40) * 100, 100) };
 }
 
-export default function HomeCalcWidget({ locale }: { locale: Locale }) {
+export default function HomeCalcWidget({ locale, content }: { locale: Locale; content: Record<string, string> }) {
   const isRTL = locale === 'ar';
+  const c = content;
   const [lmp, setLmp] = useState('');
   const [result, setResult] = useState<ReturnType<typeof calculatePregnancy> | null>(null);
 
@@ -45,18 +46,16 @@ export default function HomeCalcWidget({ locale }: { locale: Locale }) {
           {/* Left: text + input */}
           <div>
             <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: '#BB5E86' }}>
-              {isRTL ? 'حاسبة الحمل' : 'Pregnancy Calculator'}
+              {c['calc.sectionLabel']}
             </p>
             <h2 className="text-4xl font-bold mb-4 leading-tight" style={{ fontFamily: 'Georgia, serif', color: '#2D1B20' }}>
-              {isRTL ? 'حملكِ، أسبوعاً بأسبوع.' : 'Your pregnancy,\nweek by gentle week.'}
+              {c['calc.heading']}
             </h2>
             <p className="mb-8" style={{ color: '#7A6068' }}>
-              {isRTL
-                ? 'أدخلي أول يوم من آخر دورة شهرية وسنحسب لكِ موعد الولادة وأسبوع الحمل.'
-                : "Enter the first day of your last period and we'll estimate your due date and how far along you are today."}
+              {c['calc.desc']}
             </p>
             <label className="block text-sm font-medium mb-2" style={{ color: '#5C4048' }}>
-              {isRTL ? 'أول يوم من آخر دورة' : 'First day of last period'}
+              {c['calc.inputLabel']}
             </label>
             <input
               type="date"
@@ -75,7 +74,7 @@ export default function HomeCalcWidget({ locale }: { locale: Locale }) {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="rounded-2xl p-4" style={{ background: '#FAF5FF' }}>
                     <p className="text-xs uppercase tracking-widest font-semibold mb-1" style={{ color: '#A08090' }}>
-                      {isRTL ? 'أنتِ في' : 'You are'}
+                      {c['calc.youAre']}
                     </p>
                     <p className="text-3xl font-bold" style={{ color: '#BB5E86' }}>
                       {result.weeks}w {result.days}d
@@ -84,7 +83,7 @@ export default function HomeCalcWidget({ locale }: { locale: Locale }) {
                   </div>
                   <div className="rounded-2xl p-4" style={{ background: '#FAF5FF' }}>
                     <p className="text-xs uppercase tracking-widest font-semibold mb-1" style={{ color: '#A08090' }}>
-                      {isRTL ? 'موعد الولادة' : 'Due Date'}
+                      {c['calc.dueDate']}
                     </p>
                     <p className="text-xl font-bold" style={{ color: '#2D1B20' }}>
                       {result.dueDate.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
@@ -104,8 +103,7 @@ export default function HomeCalcWidget({ locale }: { locale: Locale }) {
                   <p className="text-sm mt-3" style={{ color: '#7A6068' }}>
                     <span className="w-2 h-2 rounded-full inline-block mr-2" style={{ background: '#BB5E86' }} />
                     {isRTL
-                      ? `حوالي ${result.weeksLeft} أسبوع متبقية — سنكون معكِ في كل خطوة.`
-                      : `About ${result.weeksLeft} weeks to go — we'll be with you the whole way.`}
+                      `${isRTL ? 'حوالي' : 'About'} ${result.weeksLeft} ${c['calc.weeksLeft']}`
                   </p>
                 </div>
                 <Link
@@ -113,13 +111,13 @@ export default function HomeCalcWidget({ locale }: { locale: Locale }) {
                   className="block w-full text-center py-4 rounded-2xl font-semibold text-white transition-opacity hover:opacity-90"
                   style={{ background: '#2D1B20' }}
                 >
-                  {isRTL ? 'احجزي موعدك القادم' : 'Book your next scan'}
+                  {c['calc.bookBtn']}
                 </Link>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-full py-10 gap-3" style={{ color: '#C0A0B0' }}>
                 <span className="text-5xl">🗓️</span>
-                <p className="text-sm">{isRTL ? 'أدخلي التاريخ لرؤية النتائج' : 'Enter a date to see your results'}</p>
+                <p className="text-sm">{c['calc.placeholder']}</p>
               </div>
             )}
           </div>

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { ShoppingBag, Moon, Calendar } from 'lucide-react';
+import { ShoppingBag, Moon, Calendar, FileText } from 'lucide-react';
 
 async function getStats() {
   try {
@@ -27,6 +27,7 @@ export default async function AdminDashboard() {
     { label: 'Products', value: stats.products, icon: ShoppingBag, href: '/admin/products', color: 'text-pink-500 bg-pink-50' },
     { label: 'Awake Windows', value: stats.windows, icon: Moon, href: '/admin/awake-windows', color: 'text-amber-500 bg-amber-50' },
     { label: 'Appointments', value: stats.appointments, icon: Calendar, href: '/admin/appointments', color: 'text-purple-500 bg-purple-50' },
+    { label: 'Website Text', value: '✏️', icon: FileText, href: '/admin/content', color: 'text-green-600 bg-green-50' },
   ];
 
   return (
