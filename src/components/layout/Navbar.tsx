@@ -2,12 +2,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Locale, translations } from '@/lib/i18n';
+import { Locale } from '@/lib/i18n';
 import { ShoppingBag, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
-export default function Navbar({ locale }: { locale: Locale }) {
-  const t = translations[locale].nav;
+export default function Navbar({ locale, content }: { locale: Locale; content: Record<string, string> }) {
+  const c = content;
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const isRTL = locale === 'ar';
@@ -15,10 +15,10 @@ export default function Navbar({ locale }: { locale: Locale }) {
   const otherLocalePath = pathname.replace(`/${locale}`, `/${otherLocale}`);
 
   const links = [
-    { href: `/${locale}/pregnancy-calculator`, label: t.pregnancyCalc },
-    { href: `/${locale}/book-appointment`, label: t.bookAppointment },
-    { href: `/${locale}/awake-windows`, label: t.awakeWindows },
-    { href: `/${locale}/shop`, label: t.shop },
+    { href: `/${locale}/pregnancy-calculator`, label: c['nav.pregnancyCalc'] },
+    { href: `/${locale}/book-appointment`, label: c['nav.bookAppointment'] },
+    { href: `/${locale}/awake-windows`, label: c['nav.awakeWindows'] },
+    { href: `/${locale}/shop`, label: c['nav.shop'] },
   ];
 
   return (

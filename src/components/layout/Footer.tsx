@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { Locale } from '@/lib/i18n';
 
-export default function Footer({ locale }: { locale: Locale }) {
+export default function Footer({ locale, content }: { locale: Locale; content: Record<string, string> }) {
   const isRTL = locale === 'ar';
   return (
     <footer className="border-t mt-16" style={{ background: '#FDF8F4', borderColor: '#F5E8EE' }} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -14,7 +14,7 @@ export default function Footer({ locale }: { locale: Locale }) {
           className="object-contain"
         />
         <p className="text-sm" style={{ color: '#A08090' }}>
-          {locale === 'ar' ? '© 2025 MomOfMoms. جميع الحقوق محفوظة.' : '© 2025 MomOfMoms. All rights reserved.'}
+          {content['footer.rights']}
         </p>
       </div>
     </footer>
