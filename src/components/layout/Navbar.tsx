@@ -31,9 +31,9 @@ export default function Navbar({ locale }: { locale: Locale }) {
             <Image
               src="/hero-2.png"
               alt="MomOfMoms"
-              width={90}
-              height={48}
-              className="object-contain"
+              width={160}
+              height={56}
+              className="object-contain h-14 w-auto"
               priority
             />
           </Link>

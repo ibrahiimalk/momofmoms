@@ -127,24 +127,25 @@ export default async function HomePage({ params }: { params: { locale: string } 
               </div>
             </div>
 
-            {/* White card */}
-            <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden"
-              style={{ width: '300px', height: '420px' }}>
-
-              {/* Soft gradient inside card */}
-              <div className="absolute inset-0"
-                style={{ background: 'linear-gradient(180deg, #FDF8F4 0%, #FAE0EC 100%)', opacity: 0.4 }} />
-
-              {/* Woman illustration — overflows the top of the card */}
-              <div className="absolute bottom-0 left-0 right-0 flex justify-center">
+            {/* Outer wrapper — allows illustration to overflow above card */}
+            <div className="relative" style={{ paddingTop: '80px' }}>
+              {/* Woman illustration — sits above and inside the card */}
+              <div className="absolute top-0 left-0 right-0 flex justify-center z-10">
                 <Image
                   src="/hero-1.png"
                   alt="MomOfMoms illustration"
-                  width={260}
+                  width={220}
                   height={420}
-                  className="object-contain object-bottom"
+                  className="object-contain object-top"
                   priority
                 />
+              </div>
+
+              {/* White card — behind the overflowing illustration */}
+              <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden"
+                style={{ width: '300px', height: '400px' }}>
+                <div className="absolute inset-0"
+                  style={{ background: 'linear-gradient(180deg, #FDF8F4 0%, #FAE0EC 100%)', opacity: 0.4 }} />
               </div>
             </div>
           </div>
