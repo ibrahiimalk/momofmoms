@@ -29,11 +29,11 @@ export default function Navbar({ locale }: { locale: Locale }) {
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center">
             <Image
-              src="/hero-2.png"
+              src="/logo.png"
               alt="MomOfMoms"
-              width={120}
+              width={140}
               height={64}
-              className="object-contain h-16 w-auto"
+              className="object-contain h-14 w-auto"
               priority
             />
           </Link>

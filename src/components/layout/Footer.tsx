@@ -7,7 +7,7 @@ export default function Footer({ locale }: { locale: Locale }) {
     <footer className="border-t mt-16" style={{ background: '#FDF8F4', borderColor: '#F5E8EE' }} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto px-6 py-8 text-center flex flex-col items-center gap-3">
         <Image
-          src="/hero-2.png"
+          src="/logo.png"
           alt="MomOfMoms"
           width={140}
           height={75}
