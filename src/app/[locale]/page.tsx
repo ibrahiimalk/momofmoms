@@ -127,26 +127,19 @@ export default async function HomePage({ params }: { params: { locale: string } 
               </div>
             </div>
 
-            {/* Outer wrapper — allows illustration to overflow above card */}
-            <div className="relative" style={{ paddingTop: '80px' }}>
-              {/* Woman illustration — sits above and inside the card */}
-              <div className="absolute top-0 left-0 right-0 flex justify-center z-10">
-                <Image
-                  src="/hero-2.png"
-                  alt="MomOfMoms illustration"
-                  width={280}
-                  height={420}
-                  className="object-contain object-top"
-                  priority
-                />
-              </div>
+            {/* White card with illustration inside */}
+            <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden flex items-end justify-center"
+              style={{ width: '320px', height: '420px', background: 'linear-gradient(180deg, #FEF3F8 0%, #FAE4EF 100%)' }}>
 
-              {/* White card — behind the overflowing illustration */}
-              <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden"
-                style={{ width: '300px', height: '400px' }}>
-                <div className="absolute inset-0"
-                  style={{ background: 'linear-gradient(180deg, #FDF8F4 0%, #FAE0EC 100%)', opacity: 0.4 }} />
-              </div>
+              <Image
+                src="/hero-1.png"
+                alt="MomOfMoms illustration"
+                width={280}
+                height={400}
+                className="object-contain object-bottom"
+                style={{ maxHeight: '95%', width: 'auto' }}
+                priority
+              />
             </div>
           </div>
 
