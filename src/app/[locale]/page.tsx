@@ -22,7 +22,6 @@ async function getFeaturedProducts() {
 
 export default async function HomePage({ params }: { params: { locale: string } }) {
   const locale = params.locale as Locale;
-  const t = translations[locale];
   const c = await getContent(locale);
   const isRTL = locale === 'ar';
   const products = await getFeaturedProducts();
