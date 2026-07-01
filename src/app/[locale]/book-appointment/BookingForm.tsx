@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 
 export default function BookingForm({ content }: { content: Record<string, string> }) {
   const c = content;
@@ -15,8 +14,12 @@ export default function BookingForm({ content }: { content: Record<string, strin
     setLoading(true);
     setError('');
     try {
-      const { error: err } = await supabase.from('appointments').insert([{ ...form, date: '', status: 'pending' }]);
-      if (err) throw err;
+      const res = await fetch('/api/appointment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error('Failed');
       setSuccess(true);
       setForm({ name: '', email: '', phone: '', time: '', notes: '' });
     } catch {
