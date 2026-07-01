@@ -1,8 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Locale } from '@/lib/i18n';
 
-export default function HeroDueDateBadge({ locale, label, placeholder, isRTL }: { locale: Locale; label: string; placeholder: string; isRTL: boolean }) {
+export default function HeroDueDateBadge({ label, placeholder, isRTL }: { label: string; placeholder: string; isRTL: boolean }) {
   const [dueDate, setDueDate] = useState<string | null>(null);
 
   useEffect(() => {
