@@ -9,7 +9,7 @@ const supabase = createClient(
 );
 
 const ADMIN_EMAIL = 'ibrahiim.alk@gmail.com';
-const FROM = 'MomOfMoms <noreply@momofmoms.com>';
+const FROM = 'MomOfMoms <noreply@momofmomskw.com>';
 
 function periodLabel(time: string) {
   if (time === 'morning') return { ar: 'الفترة الصباحية 🌅', en: 'Morning Period 🌅' };
