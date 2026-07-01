@@ -16,6 +16,7 @@ export default function ProductsAdmin() {
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [selling, setSelling] = useState<string | null>(null);
 
   const load = async () => {
     const { data } = await supabase.from('products').select('*').order('category').order('created_at', { ascending: false });
@@ -76,6 +77,15 @@ export default function ProductsAdmin() {
     });
     setEditId(p.id);
     setShowForm(true);
+  };
+
+  const handleSold = async (p: Product) => {
+    if ((p.quantity ?? 0) <= 0) return;
+    setSelling(p.id);
+    const newQty = (p.quantity ?? 0) - 1;
+    await supabase.from('products').update({ quantity: newQty, in_stock: newQty > 0 }).eq('id', p.id);
+    setSelling(null);
+    load();
   };
 
   const handleDelete = async (id: string) => {
@@ -206,6 +216,15 @@ export default function ProductsAdmin() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2 justify-end">
+                            <button
+                              onClick={() => handleSold(p)}
+                              disabled={selling === p.id || (p.quantity ?? 0) <= 0}
+                              title="Mark one as sold"
+                              className="text-xs px-2.5 py-1 rounded-lg font-medium border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                              style={{ borderColor: '#BB5E86', color: '#BB5E86' }}
+                            >
+                              {selling === p.id ? '…' : '− Sold'}
+                            </button>
                             <button onClick={() => handleEdit(p)} className="p-1.5 hover:bg-gray-100 rounded-lg">
                               <Edit size={15} className="text-gray-500" />
                             </button>
