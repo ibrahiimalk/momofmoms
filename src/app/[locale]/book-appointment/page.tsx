@@ -14,7 +14,7 @@ export default async function BookAppointmentPage({ params }: { params: { locale
         <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Georgia, serif', color: '#2D1B20' }}>{c['book.title']}</h1>
         <p style={{ color: '#7A6068' }}>{c['book.subtitle']}</p>
       </div>
-      <BookingForm locale={locale} content={c} />
+      <BookingForm content={c} />
     </div>
   );
 }
