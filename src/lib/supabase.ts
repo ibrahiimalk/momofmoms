@@ -17,6 +17,7 @@ export type Product = {
   category: string;
   image_url: string;
   in_stock: boolean;
+  quantity: number;
   created_at: string;
 };
 
