@@ -25,8 +25,17 @@ export default function HomeCalcWidget({ locale, content }: { locale: Locale; co
 
   const handleChange = (val: string) => {
     setLmp(val);
-    if (val) setResult(calculatePregnancy(new Date(val)));
-    else setResult(null);
+    if (val) {
+      const res = calculatePregnancy(new Date(val));
+      setResult(res);
+      const formatted = res.dueDate.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+      });
+      window.dispatchEvent(new CustomEvent('momofmoms:duedate', { detail: formatted }));
+    } else {
+      setResult(null);
+      window.dispatchEvent(new CustomEvent('momofmoms:duedate', { detail: null }));
+    }
   };
 
   const trimesterLabel = result

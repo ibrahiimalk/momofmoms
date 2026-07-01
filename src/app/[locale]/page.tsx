@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { getContent } from '@/lib/content';
 import ProductCard from '@/components/ui/ProductCard';
 import HomeCalcWidget from '@/components/ui/HomeCalcWidget';
+import HeroDueDateBadge from '@/components/ui/HeroDueDateBadge';
 
 async function getFeaturedProducts() {
   try {
@@ -129,16 +130,8 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
           {/* Illustration side */}
           <div className={`relative flex justify-center items-end ${isRTL ? 'order-1 md:order-1' : 'order-1 md:order-2'}`}>
-            {/* Due date badge — floats top-left of card */}
-            <div className="absolute top-4 z-20"
-              style={{ [isRTL ? 'right' : 'left']: '-10px' }}>
-              <div className="bg-white rounded-2xl shadow-lg px-4 py-3 min-w-[140px]">
-                <div className="uppercase tracking-widest text-[10px] font-semibold mb-0.5" style={{ color: '#A08090' }}>
-                  {c['home.estimatedDue']}
-                </div>
-                <div className="text-lg font-bold" style={{ color: '#BB5E86' }}>Jan 21, 2027</div>
-              </div>
-            </div>
+            {/* Due date badge — managed by HomeCalcWidget via portal/prop */}
+            <HeroDueDateBadge locale={locale} label={c['home.estimatedDue']} isRTL={isRTL} />
 
             {/* White card with illustration inside */}
             <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden flex items-end justify-center"
