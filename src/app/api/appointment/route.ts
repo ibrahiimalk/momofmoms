@@ -96,23 +96,25 @@ export async function POST(req: NextRequest) {
 
     const period = periodLabel(time);
 
-    // Send both emails in parallel
-    await Promise.all([
-      // Admin notification (always)
-      resend.emails.send({
-        from: FROM,
-        to: ADMIN_EMAIL,
-        subject: `📅 New Appointment — ${name}`,
-        html: adminEmail(name, phone, email, period, notes),
-      }),
-      // Customer confirmation (only if they gave an email)
-      ...(email ? [resend.emails.send({
+    // Send admin notification
+    const adminResult = await resend.emails.send({
+      from: FROM,
+      to: ADMIN_EMAIL,
+      subject: `📅 New Appointment — ${name}`,
+      html: adminEmail(name, phone, email, period, notes),
+    });
+    console.log('Admin email result:', JSON.stringify(adminResult));
+
+    // Send customer confirmation if email provided
+    if (email) {
+      const clientResult = await resend.emails.send({
         from: FROM,
         to: email,
         subject: 'تم استلام طلبك — MomOfMoms',
         html: clientEmail(name, period, notes),
-      })] : []),
-    ]);
+      });
+      console.log('Client email result:', JSON.stringify(clientResult));
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
