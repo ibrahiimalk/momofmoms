@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 
 const TIME_SLOTS = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
 
-export default function BookingForm({ content }: { locale: Locale; content: Record<string, string> }) {
+export default function BookingForm({ content }: { content: Record<string, string> }) {
   const c = content;
   const [form, setForm] = useState({ name: '', email: '', phone: '', date: '', time: '', notes: '' });
   const [loading, setLoading] = useState(false);
