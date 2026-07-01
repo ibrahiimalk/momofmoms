@@ -2,25 +2,23 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
-
-const TIME_SLOTS = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
-
 export default function BookingForm({ content }: { content: Record<string, string> }) {
   const c = content;
-  const [form, setForm] = useState({ name: '', email: '', phone: '', date: '', time: '', notes: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', time: '', notes: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.time) { setError(c['book.error']); return; }
     setLoading(true);
     setError('');
     try {
-      const { error: err } = await supabase.from('appointments').insert([{ ...form, status: 'pending' }]);
+      const { error: err } = await supabase.from('appointments').insert([{ ...form, date: '', status: 'pending' }]);
       if (err) throw err;
       setSuccess(true);
-      setForm({ name: '', email: '', phone: '', date: '', time: '', notes: '' });
+      setForm({ name: '', email: '', phone: '', time: '', notes: '' });
     } catch {
       setError(c['book.error']);
     } finally {
@@ -30,10 +28,21 @@ export default function BookingForm({ content }: { content: Record<string, strin
 
   if (success) {
     return (
-      <div className="text-center py-16 rounded-2xl" style={{ background: '#F0FDF4' }}>
-        <div className="text-5xl mb-4">✅</div>
-        <p className="font-semibold text-lg" style={{ color: '#15803D' }}>{c['book.success']}</p>
-        <button onClick={() => setSuccess(false)} className="mt-4 text-sm underline" style={{ color: '#BB5E86' }}>
+      <div className="text-center py-16 px-8 rounded-3xl" style={{ background: 'linear-gradient(135deg, #FDF0EC 0%, #FAE8EF 100%)' }}>
+        <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl" style={{ background: '#FAE0EC' }}>
+          💌
+        </div>
+        <h3 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Georgia, serif', color: '#2D1B20' }}>
+          {c['book.successTitle']}
+        </h3>
+        <p className="text-base leading-relaxed mb-8" style={{ color: '#7A6068' }}>
+          {c['book.successMsg']}
+        </p>
+        <button
+          onClick={() => setSuccess(false)}
+          className="px-6 py-2.5 rounded-full text-sm font-semibold border-2 transition-colors hover:opacity-80"
+          style={{ borderColor: '#BB5E86', color: '#BB5E86' }}
+        >
           {c['book.bookAnother']}
         </button>
       </div>
@@ -41,46 +50,63 @@ export default function BookingForm({ content }: { content: Record<string, strin
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border p-6 space-y-4" style={{ borderColor: '#F0E8EC' }}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1" style={{ color: '#5C4048' }}>{c['book.name']} *</label>
-          <input type="text" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-            className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-400" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1" style={{ color: '#5C4048' }}>{c['book.phone']} *</label>
-          <input type="tel" required value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-            className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-400" />
-        </div>
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border p-6 space-y-5" style={{ borderColor: '#F0E8EC' }}>
+      {/* Name */}
+      <div>
+        <label className="block text-sm font-medium mb-1" style={{ color: '#5C4048' }}>{c['book.name']} *</label>
+        <input type="text" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+          className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-400" />
       </div>
+
+      {/* Phone */}
+      <div>
+        <label className="block text-sm font-medium mb-1" style={{ color: '#5C4048' }}>{c['book.phone']} *</label>
+        <input type="tel" required value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+          className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-400" />
+      </div>
+
+      {/* Email */}
       <div>
         <label className="block text-sm font-medium mb-1" style={{ color: '#5C4048' }}>{c['book.email']}</label>
         <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
           className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-400" />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1" style={{ color: '#5C4048' }}>{c['book.date']} *</label>
-          <input type="date" required value={form.date} min={new Date().toISOString().split('T')[0]}
-            onChange={e => setForm({ ...form, date: e.target.value })}
-            className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-400" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1" style={{ color: '#5C4048' }}>{c['book.time']} *</label>
-          <select required value={form.time} onChange={e => setForm({ ...form, time: e.target.value })}
-            className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-400 bg-white">
-            <option value="">-- {c['book.time']} --</option>
-            {TIME_SLOTS.map(slot => <option key={slot} value={slot}>{slot}</option>)}
-          </select>
+
+      {/* Period toggle */}
+      <div>
+        <label className="block text-sm font-medium mb-3" style={{ color: '#5C4048' }}>{c['book.period']} *</label>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { value: 'morning', label: c['book.morning'], emoji: '🌅' },
+            { value: 'evening', label: c['book.evening'], emoji: '🌙' },
+          ].map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setForm({ ...form, time: opt.value })}
+              className="flex flex-col items-center gap-2 py-4 rounded-2xl border-2 font-medium text-sm transition-all"
+              style={{
+                borderColor: form.time === opt.value ? '#BB5E86' : '#E5E7EB',
+                background: form.time === opt.value ? '#FAE0EC' : 'white',
+                color: form.time === opt.value ? '#BB5E86' : '#6B7280',
+              }}
+            >
+              <span className="text-2xl">{opt.emoji}</span>
+              {opt.label}
+            </button>
+          ))}
         </div>
       </div>
+
+      {/* Notes */}
       <div>
         <label className="block text-sm font-medium mb-1" style={{ color: '#5C4048' }}>{c['book.notes']}</label>
         <textarea rows={3} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
           className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-400 resize-none" />
       </div>
+
       {error && <p className="text-red-500 text-sm">{error}</p>}
+
       <button type="submit" disabled={loading}
         className="w-full text-white py-3 rounded-xl font-semibold transition-opacity hover:opacity-90 disabled:opacity-60"
         style={{ background: '#BB5E86' }}>
