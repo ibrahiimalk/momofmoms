@@ -14,8 +14,35 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "MomOfMoms",
-  description: "Everything you need for your motherhood journey",
+  title: {
+    default: 'MomOfMoms — مستشارتك في الأمومة',
+    template: '%s | MomOfMoms',
+  },
+  description: 'Your trusted partner in pregnancy and motherhood. Pregnancy calculator, baby products, awake windows, and appointment booking for new moms.',
+  keywords: ['pregnancy', 'maternity', 'baby', 'motherhood', 'حمل', 'أمومة', 'pregnancy calculator', 'baby clothes', 'mom consultant'],
+  authors: [{ name: 'MomOfMoms' }],
+  metadataBase: new URL('https://momofmoms.vercel.app'),
+  openGraph: {
+    title: 'MomOfMoms — مستشارتك في الأمومة',
+    description: 'Your trusted partner in pregnancy and motherhood.',
+    url: 'https://momofmoms.vercel.app',
+    siteName: 'MomOfMoms',
+    locale: 'ar_SA',
+    alternateLocale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MomOfMoms — مستشارتك في الأمومة',
+    description: 'Your trusted partner in pregnancy and motherhood.',
+  },
+  alternates: {
+    canonical: 'https://momofmoms.vercel.app/ar',
+    languages: {
+      'ar': 'https://momofmoms.vercel.app/ar',
+      'en': 'https://momofmoms.vercel.app/en',
+    },
+  },
 };
 
 export default function RootLayout({
