@@ -131,7 +131,7 @@ export default async function HomePage({ params }: { params: { locale: string } 
           {/* Illustration side */}
           <div className={`relative flex justify-center items-end ${isRTL ? 'order-1 md:order-1' : 'order-1 md:order-2'}`}>
             {/* Due date badge — managed by HomeCalcWidget via portal/prop */}
-            <HeroDueDateBadge locale={locale} label={c['home.estimatedDue']} isRTL={isRTL} />
+            <HeroDueDateBadge locale={locale} label={c['home.estimatedDue']} placeholder={c['home.duePlaceholder']} isRTL={isRTL} />
 
             {/* White card with illustration inside */}
             <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden flex items-end justify-center"

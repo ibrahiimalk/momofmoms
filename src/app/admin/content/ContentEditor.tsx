@@ -25,6 +25,7 @@ const SECTIONS: { title: string; rows: Omit<Row, 'ar' | 'en'>[] }[] = [
       { key: 'home.heroBook', label: 'Primary button' },
       { key: 'home.heroCalc', label: 'Secondary button' },
       { key: 'home.estimatedDue', label: 'Due date card label' },
+      { key: 'home.duePlaceholder', label: 'Due date card — placeholder text (before user enters date)' },
     ],
   },
   {

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Locale } from '@/lib/i18n';
 
-export default function HeroDueDateBadge({ locale, label, isRTL }: { locale: Locale; label: string; isRTL: boolean }) {
+export default function HeroDueDateBadge({ locale, label, placeholder, isRTL }: { locale: Locale; label: string; placeholder: string; isRTL: boolean }) {
   const [dueDate, setDueDate] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function HeroDueDateBadge({ locale, label, isRTL }: { locale: Loc
           <div className="text-lg font-bold" style={{ color: '#BB5E86' }}>{dueDate}</div>
         ) : (
           <div className="text-sm italic" style={{ color: '#C0A0B0' }}>
-            {locale === 'ar' ? 'أدخلي تاريخ آخر دورة' : 'Enter LMP below'}
+            {placeholder}
           </div>
         )}
       </div>
