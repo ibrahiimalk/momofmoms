@@ -100,7 +100,7 @@ export default function ProductsAdmin() {
                 className="w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:border-pink-400" />
             </div>
             <div>
-              <label className="text-xs text-gray-500 font-medium">Price (SAR)</label>
+              <label className="text-xs text-gray-500 font-medium">Price (KWD)</label>
               <input type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })}
                 className="w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:border-pink-400" />
             </div>
@@ -164,7 +164,7 @@ export default function ProductsAdmin() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{p.price} SAR</td>
+                  <td className="px-4 py-3 text-gray-700">{p.price} KWD</td>
                   <td className="px-4 py-3 text-gray-500">{p.category || '-'}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.in_stock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>

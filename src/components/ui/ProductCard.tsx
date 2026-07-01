@@ -24,7 +24,7 @@ export default function ProductCard({ product, locale }: { product: Product; loc
       </div>
       <div className="p-3">
         <p className="font-medium text-gray-800 text-sm line-clamp-2">{name}</p>
-        <p className="text-pink-600 font-bold mt-1">{product.price} {locale === 'ar' ? 'ر.س' : 'SAR'}</p>
+        <p className="text-pink-600 font-bold mt-1">{product.price} {locale === 'ar' ? 'د.ك' : 'KWD'}</p>
       </div>
     </div>
   );
