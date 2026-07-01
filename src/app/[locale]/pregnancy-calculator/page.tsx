@@ -1,19 +1,20 @@
-import { Locale, translations } from '@/lib/i18n';
+export const dynamic = 'force-dynamic';
+import { Locale } from '@/lib/i18n';
+import { getContent } from '@/lib/content';
 import PregnancyCalcClient from './PregnancyCalcClient';
 
-export default function PregnancyCalculatorPage({ params }: { params: { locale: string } }) {
+export default async function PregnancyCalculatorPage({ params }: { params: { locale: string } }) {
   const locale = params.locale as Locale;
-  const t = translations[locale];
   const isRTL = locale === 'ar';
+  const c = await getContent(locale);
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen bg-white max-w-2xl mx-auto px-4 py-10">
+    <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen max-w-2xl mx-auto px-4 py-10" style={{ background: '#FDF8F4' }}>
       <div className="text-center mb-10">
-        <div className="text-5xl mb-3">🗓️</div>
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">{t.calc.title}</h1>
-        <p className="text-gray-500">{t.calc.subtitle}</p>
+        <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Georgia, serif', color: '#2D1B20' }}>{c['pregcalc.title']}</h1>
+        <p style={{ color: '#7A6068' }}>{c['pregcalc.subtitle']}</p>
       </div>
-      <PregnancyCalcClient locale={locale} t={t.calc} />
+      <PregnancyCalcClient locale={locale} content={c} />
     </div>
   );
 }
