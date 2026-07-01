@@ -1,26 +1,31 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Product } from '@/lib/supabase';
+import { Product, Category } from '@/lib/supabase';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { Trash2, Edit, Plus, X, Check } from 'lucide-react';
 import Image from 'next/image';
 
-const EMPTY_FORM = { name_ar: '', name_en: '', price: '', category: '', image_url: '', in_stock: true, quantity: '0' };
+const EMPTY_FORM = { name_ar: '', name_en: '', price: '', category_id: '', image_url: '', in_stock: true, quantity: '0' };
 
 export default function ProductsAdmin() {
   const supabase = createSupabaseBrowser();
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [selling, setSelling] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const load = async () => {
-    const { data } = await supabase.from('products').select('*').order('category').order('created_at', { ascending: false });
-    setProducts(data || []);
+    const [{ data: prods }, { data: cats }] = await Promise.all([
+      supabase.from('products').select('*, categories(id, name_ar, name_en)').order('category_id').order('created_at', { ascending: false }),
+      supabase.from('categories').select('*').order('order_index').order('created_at'),
+    ]);
+    setProducts(prods || []);
+    setCategories(cats || []);
     setLoading(false);
   };
 
@@ -37,16 +42,19 @@ export default function ProductsAdmin() {
   };
 
   const handleSave = async () => {
+    if (!form.category_id) { alert('Please select a category first.'); return; }
     setSaving(true);
     try {
       let image_url = form.image_url;
       if (imageFile) image_url = await uploadImage(imageFile);
-
       const payload = {
-        ...form,
+        name_ar: form.name_ar,
+        name_en: form.name_en,
         price: parseFloat(form.price) || 0,
         quantity: parseInt(form.quantity) || 0,
+        category_id: form.category_id,
         image_url,
+        in_stock: form.in_stock,
       };
       if (editId) {
         await supabase.from('products').update(payload).eq('id', editId);
@@ -70,13 +78,19 @@ export default function ProductsAdmin() {
       name_ar: p.name_ar,
       name_en: p.name_en,
       price: String(p.price),
-      category: p.category,
+      category_id: p.category_id || '',
       image_url: p.image_url,
       in_stock: p.in_stock,
       quantity: String(p.quantity ?? 0),
     });
     setEditId(p.id);
     setShowForm(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this product?')) return;
+    await supabase.from('products').delete().eq('id', id);
+    load();
   };
 
   const handleSold = async (p: Product) => {
@@ -88,33 +102,37 @@ export default function ProductsAdmin() {
     load();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this product?')) return;
-    await supabase.from('products').delete().eq('id', id);
-    load();
-  };
-
-  // Group products by category
-  const grouped = products.reduce<Record<string, Product[]>>((acc, p) => {
-    const cat = p.category || 'Uncategorized';
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(p);
-    return acc;
-  }, {});
+  // Group by category
+  const grouped: Record<string, { cat: Category | null; items: Product[] }> = {};
+  for (const p of products) {
+    const catId = p.category_id || '__none__';
+    if (!grouped[catId]) {
+      grouped[catId] = { cat: p.categories || null, items: [] };
+    }
+    grouped[catId].items.push(p);
+  }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-bold text-gray-800">Products</h1>
-        <button onClick={() => { setForm({ ...EMPTY_FORM }); setEditId(null); setShowForm(true); }}
-          className="flex items-center gap-2 bg-pink-500 text-white px-4 py-2 rounded-xl hover:bg-pink-600 text-sm font-medium">
+        <button
+          onClick={() => { setForm({ ...EMPTY_FORM }); setEditId(null); setShowForm(true); }}
+          className="flex items-center gap-2 bg-pink-500 text-white px-4 py-2 rounded-xl hover:bg-pink-600 text-sm font-medium"
+        >
           <Plus size={16} /> Add Product
         </button>
       </div>
+      {categories.length === 0 && (
+        <p className="text-amber-600 text-sm mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
+          ⚠️ You need to create categories first before adding products.{' '}
+          <a href="/admin/categories" className="underline font-medium">Go to Categories →</a>
+        </p>
+      )}
 
       {/* Form */}
       {showForm && (
-        <div className="bg-white rounded-2xl border p-6 mb-6 shadow-sm">
+        <div className="bg-white rounded-2xl border p-6 mb-6 shadow-sm mt-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-700">{editId ? 'Edit Product' : 'New Product'}</h2>
             <button onClick={() => setShowForm(false)}><X size={18} className="text-gray-400" /></button>
@@ -141,10 +159,20 @@ export default function ProductsAdmin() {
                 className="w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:border-pink-400" />
             </div>
             <div>
-              <label className="text-xs text-gray-500 font-medium">Category</label>
-              <input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
-                placeholder="e.g. Diapers, Clothes, Feeding"
-                className="w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:border-pink-400" />
+              <label className="text-xs text-gray-500 font-medium">Category <span className="text-red-400">*</span></label>
+              <select
+                value={form.category_id}
+                onChange={e => setForm({ ...form, category_id: e.target.value })}
+                className="w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:border-pink-400 bg-white"
+              >
+                <option value="">— Select a category —</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name_en} / {cat.name_ar}</option>
+                ))}
+              </select>
+              {categories.length === 0 && (
+                <p className="text-xs text-red-400 mt-1">No categories yet. <a href="/admin/categories" className="underline">Create one first.</a></p>
+              )}
             </div>
             <div className="flex items-center gap-2 pt-5">
               <input type="checkbox" id="instock" checked={form.in_stock}
@@ -162,22 +190,24 @@ export default function ProductsAdmin() {
           </div>
           <button onClick={handleSave} disabled={saving}
             className="mt-4 flex items-center gap-2 bg-pink-500 text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-pink-600 disabled:opacity-60">
-            <Check size={16} /> {saving ? 'Saving...' : 'Save Product'}
+            <Check size={16} /> {saving ? 'Saving…' : 'Save Product'}
           </button>
         </div>
       )}
 
       {/* Products grouped by category */}
       {loading ? (
-        <div className="text-center py-16 text-gray-400">Loading...</div>
+        <div className="text-center py-16 text-gray-400">Loading…</div>
       ) : products.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-2xl border text-gray-400">No products yet.</div>
       ) : (
-        <div className="space-y-8">
-          {Object.entries(grouped).map(([category, items]) => (
-            <div key={category}>
+        <div className="space-y-8 mt-6">
+          {Object.entries(grouped).map(([catId, { cat, items }]) => (
+            <div key={catId}>
               <div className="flex items-center gap-3 mb-3">
-                <h2 className="text-base font-bold text-gray-700">{category}</h2>
+                <h2 className="text-base font-bold text-gray-700">
+                  {cat ? `${cat.name_en} / ${cat.name_ar}` : 'Uncategorized'}
+                </h2>
                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{items.length} products</span>
               </div>
               <div className="bg-white rounded-2xl border overflow-hidden">
@@ -197,9 +227,9 @@ export default function ProductsAdmin() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                              {p.image_url ? (
-                                <Image src={p.image_url} alt={p.name_en} width={40} height={40} className="object-cover" />
-                              ) : <div className="w-full h-full flex items-center justify-center text-lg">👶</div>}
+                              {p.image_url
+                                ? <Image src={p.image_url} alt={p.name_en} width={40} height={40} className="object-cover" />
+                                : <div className="w-full h-full flex items-center justify-center text-lg">👶</div>}
                             </div>
                             <div>
                               <p className="font-medium text-gray-800">{p.name_en}</p>
@@ -208,7 +238,7 @@ export default function ProductsAdmin() {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-gray-700">{p.price} KWD</td>
-                        <td className="px-4 py-3 text-gray-700">{p.quantity ?? 0}</td>
+                        <td className="px-4 py-3 text-gray-700 font-medium">{p.quantity ?? 0}</td>
                         <td className="px-4 py-3">
                           <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.in_stock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
                             {p.in_stock ? 'In Stock' : 'Out of Stock'}

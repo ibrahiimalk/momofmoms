@@ -9,12 +9,22 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+export type Category = {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  order_index: number;
+  created_at: string;
+};
+
 export type Product = {
   id: string;
   name_ar: string;
   name_en: string;
   price: number;
   category: string;
+  category_id: string | null;
+  categories?: Category;
   image_url: string;
   in_stock: boolean;
   quantity: number;

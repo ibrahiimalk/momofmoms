@@ -1,10 +1,11 @@
 import Link from 'next/link';
-import { ShoppingBag, Moon, Calendar, LayoutDashboard, FileText } from 'lucide-react';
+import { ShoppingBag, Moon, Calendar, LayoutDashboard, FileText, Tag } from 'lucide-react';
 import LogoutButton from './LogoutButton';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/admin/categories', label: 'Categories', icon: Tag },
     { href: '/admin/products', label: 'Products', icon: ShoppingBag },
     { href: '/admin/awake-windows', label: 'Awake Windows', icon: Moon },
     { href: '/admin/appointments', label: 'Appointments', icon: Calendar },
