@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Fetch authoritative product data — never trust price/name/stock from the client
-    const productIds = [...quantityById.keys()];
+    const productIds = Array.from(quantityById.keys());
     const { data: products, error: productsErr } = await supabase
       .from('products')
       .select('id, name_ar, name_en, price, image_url, in_stock, quantity')
