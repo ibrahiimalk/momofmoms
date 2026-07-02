@@ -144,26 +144,26 @@ export async function POST(req: NextRequest) {
 
     const total = verifiedItems.reduce((s, i) => s + i.price * i.quantity, 0);
 
-    // Insert order
-    const { data: order, error: orderErr } = await supabase
+    // Insert order — generate the id ourselves so we never need SELECT-after-INSERT permission
+    const orderId = crypto.randomUUID();
+    const { error: orderErr } = await supabase
       .from('orders')
       .insert([{
+        id: orderId,
         name: name.trim(), email: email.trim(), phone: phone.trim(),
         area: area.trim(), block: block.trim(), street: street.trim(),
         avenue: avenue?.trim() || null, house: house.trim(),
         total_price: total, status: 'pending',
-      }])
-      .select('id')
-      .single();
+      }]);
 
-    if (orderErr || !order) {
+    if (orderErr) {
       console.error('Order insert error:', orderErr);
       return NextResponse.json({ error: 'DB failed' }, { status: 500 });
     }
 
     // Insert order items
     const orderItems = verifiedItems.map(i => ({
-      order_id: order.id,
+      order_id: orderId,
       product_id: i.id,
       name_ar: i.name_ar,
       name_en: i.name_en,
@@ -189,7 +189,7 @@ export async function POST(req: NextRequest) {
       html: customerEmailHtml(name.trim(), verifiedItems, total, addressObj),
     });
 
-    return NextResponse.json({ ok: true, orderId: order.id });
+    return NextResponse.json({ ok: true, orderId });
   } catch (err) {
     console.error('Order error:', err);
     return NextResponse.json({ error: 'Failed' }, { status: 500 });
