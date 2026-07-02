@@ -1,8 +1,15 @@
+'use client';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ShoppingBag, Moon, Calendar, LayoutDashboard, FileText, Tag, ClipboardList } from 'lucide-react';
 import LogoutButton from './LogoutButton';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
   const navItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/categories', label: 'Categories', icon: Tag },
