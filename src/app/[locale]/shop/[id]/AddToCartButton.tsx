@@ -19,9 +19,12 @@ type Props = {
 };
 
 export default function AddToCartButton({ product, cartLabel, addedLabel, soldOutLabel }: Props) {
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
   const [added, setAdded] = useState(false);
   const soldOut = !product.in_stock || product.quantity <= 0;
+
+  const cartItem = items.find(i => i.id === product.id);
+  const atMax = !!cartItem && cartItem.quantity >= product.quantity;
 
   const handleAdd = () => {
     addItem({
@@ -30,6 +33,7 @@ export default function AddToCartButton({ product, cartLabel, addedLabel, soldOu
       name_en: product.name_en,
       price: product.price,
       image_url: product.image_url,
+      stock_quantity: product.quantity,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -38,15 +42,15 @@ export default function AddToCartButton({ product, cartLabel, addedLabel, soldOu
   return (
     <button
       onClick={handleAdd}
-      disabled={soldOut || added}
+      disabled={soldOut || atMax}
       className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-semibold text-base transition-all disabled:opacity-60"
       style={{
-        background: added ? '#4CAF50' : soldOut ? '#E0D0D8' : '#BB5E86',
+        background: added ? '#4CAF50' : (soldOut || atMax) ? '#E0D0D8' : '#BB5E86',
         color: 'white',
       }}
     >
       {added ? <Check size={20} /> : <ShoppingBag size={20} />}
-      {soldOut ? soldOutLabel : added ? addedLabel : cartLabel}
+      {soldOut ? soldOutLabel : atMax ? (cartItem!.quantity + ' / ' + product.quantity + ' in cart') : added ? addedLabel : cartLabel}
     </button>
   );
 }

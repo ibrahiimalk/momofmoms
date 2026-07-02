@@ -8,6 +8,7 @@ export type CartItem = {
   price: number;
   image_url: string;
   quantity: number;
+  stock_quantity: number;
 };
 
 type CartContextType = {
@@ -40,9 +41,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const addItem = useCallback((item: Omit<CartItem, 'quantity'>) => {
     setItems(prev => {
       const existing = prev.find(i => i.id === item.id);
-      const next = existing
-        ? prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i)
-        : [...prev, { ...item, quantity: 1 }];
+      let next: CartItem[];
+      if (existing) {
+        const newQty = Math.min(existing.quantity + 1, item.stock_quantity);
+        next = prev.map(i => i.id === item.id ? { ...i, quantity: newQty } : i);
+      } else {
+        next = [...prev, { ...item, quantity: 1 }];
+      }
       try { localStorage.setItem('mom_cart', JSON.stringify(next)); } catch {}
       return next;
     });
@@ -57,13 +62,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateQty = useCallback((id: string, qty: number) => {
-    if (qty <= 0) { removeItem(id); return; }
     setItems(prev => {
-      const next = prev.map(i => i.id === id ? { ...i, quantity: qty } : i);
+      const item = prev.find(i => i.id === id);
+      if (!item) return prev;
+      if (qty <= 0) {
+        const next = prev.filter(i => i.id !== id);
+        try { localStorage.setItem('mom_cart', JSON.stringify(next)); } catch {}
+        return next;
+      }
+      const capped = Math.min(qty, item.stock_quantity);
+      const next = prev.map(i => i.id === id ? { ...i, quantity: capped } : i);
       try { localStorage.setItem('mom_cart', JSON.stringify(next)); } catch {}
       return next;
     });
-  }, [removeItem]);
+  }, []);
 
   const clearCart = useCallback(() => persist([]), []);
 
