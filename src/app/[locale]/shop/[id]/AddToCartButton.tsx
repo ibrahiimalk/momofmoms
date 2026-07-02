@@ -13,13 +13,12 @@ type Props = {
     in_stock: boolean;
     quantity: number;
   };
-  locale: string;
   cartLabel: string;
   addedLabel: string;
   soldOutLabel: string;
 };
 
-export default function AddToCartButton({ product, locale, cartLabel, addedLabel, soldOutLabel }: Props) {
+export default function AddToCartButton({ product, cartLabel, addedLabel, soldOutLabel }: Props) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
   const soldOut = !product.in_stock || product.quantity <= 0;
