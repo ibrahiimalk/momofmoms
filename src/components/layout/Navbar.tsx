@@ -5,11 +5,13 @@ import { usePathname } from 'next/navigation';
 import { Locale } from '@/lib/i18n';
 import { ShoppingBag, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useCart } from '@/lib/cart-context';
 
 export default function Navbar({ locale, content }: { locale: Locale; content: Record<string, string> }) {
   const c = content;
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { totalCount } = useCart();
   const isRTL = locale === 'ar';
   const otherLocale = locale === 'ar' ? 'en' : 'ar';
   const otherLocalePath = pathname.replace(`/${locale}`, `/${otherLocale}`);
@@ -65,8 +67,13 @@ export default function Navbar({ locale, content }: { locale: Locale; content: R
             >
               {otherLocale === 'ar' ? 'ع' : 'EN'}
             </Link>
-            <Link href={`/${locale}/shop`} className="p-2 rounded-full transition-colors hover:bg-pink-50">
+            <Link href={`/${locale}/cart`} className="relative p-2 rounded-full transition-colors hover:bg-pink-50">
               <ShoppingBag size={18} style={{ color: '#5C4048' }} />
+              {totalCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-white text-[10px] font-bold rounded-full px-1" style={{ background: '#BB5E86' }}>
+                  {totalCount > 99 ? '99+' : totalCount}
+                </span>
+              )}
             </Link>
             <Link href="/admin" className="p-2 rounded-full transition-colors hover:bg-pink-50">
               <User size={18} style={{ color: '#5C4048' }} />

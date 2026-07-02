@@ -4,6 +4,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { notFound } from 'next/navigation';
 import { getContent } from '@/lib/content';
+import { CartProvider } from '@/lib/cart-context';
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -23,10 +24,12 @@ export default async function LocaleLayout({
   const c = await getContent(locale);
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'} className={`bg-white ${isRTL ? 'font-arabic' : ''}`} style={{ backgroundColor: '#ffffff' }}>
-      <Navbar locale={locale} content={c} />
-      <main className="min-h-screen bg-white" style={{ backgroundColor: '#ffffff' }}>{children}</main>
-      <Footer locale={locale} content={c} />
-    </div>
+    <CartProvider>
+      <div dir={isRTL ? 'rtl' : 'ltr'} className={`bg-white ${isRTL ? 'font-arabic' : ''}`} style={{ backgroundColor: '#ffffff' }}>
+        <Navbar locale={locale} content={c} />
+        <main className="min-h-screen bg-white" style={{ backgroundColor: '#ffffff' }}>{children}</main>
+        <Footer locale={locale} content={c} />
+      </div>
+    </CartProvider>
   );
 }

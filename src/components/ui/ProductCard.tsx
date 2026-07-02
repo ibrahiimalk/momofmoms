@@ -3,23 +3,19 @@ import { useState } from 'react';
 import { Product } from '@/lib/supabase';
 import { Locale } from '@/lib/i18n';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function ProductCard({ product, locale }: { product: Product; locale: Locale }) {
   const name = locale === 'ar' ? product.name_ar : product.name_en;
   const description = locale === 'ar' ? product.description_ar : product.description_en;
   const soldOut = !product.in_stock || (product.quantity !== undefined && product.quantity <= 0);
 
-  // Build full image list: main + gallery
-  const allImages = [
-    product.image_url,
-    ...(product.gallery_images || []),
-  ].filter(Boolean);
-
+  const allImages = [product.image_url, ...(product.gallery_images || [])].filter(Boolean);
   const [activeIdx, setActiveIdx] = useState(0);
 
   return (
-    <div className={`bg-white rounded-2xl shadow-sm overflow-hidden transition-shadow ${soldOut ? 'opacity-60' : 'hover:shadow-md'}`}>
-      {/* Main image with thumbnail dots */}
+    <Link href={`/${locale}/shop/${product.id}`} className={`block bg-white rounded-2xl shadow-sm overflow-hidden transition-shadow ${soldOut ? 'opacity-60' : 'hover:shadow-md'}`}>
+      {/* Image */}
       <div className="relative aspect-square bg-gray-100">
         {allImages.length > 0 ? (
           <Image
@@ -40,18 +36,21 @@ export default function ProductCard({ product, locale }: { product: Product; loc
           </div>
         )}
 
-        {/* Thumbnail strip — only show if there are multiple images */}
+        {/* Thumbnail dots for gallery */}
         {allImages.length > 1 && (
-          <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 px-2">
+          <div
+            className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 px-2"
+            onClick={e => e.preventDefault()}
+          >
             {allImages.map((src, i) => (
               <button
                 key={i}
-                onClick={() => setActiveIdx(i)}
-                className={`w-8 h-8 rounded-md overflow-hidden border-2 transition-all flex-shrink-0 ${
+                onClick={e => { e.preventDefault(); setActiveIdx(i); }}
+                className={`w-7 h-7 rounded-md overflow-hidden border-2 transition-all flex-shrink-0 ${
                   i === activeIdx ? 'border-white scale-110 shadow-md' : 'border-transparent opacity-70'
                 }`}
               >
-                <Image src={src} alt="" width={32} height={32} className="object-cover w-full h-full" />
+                <Image src={src} alt="" width={28} height={28} className="object-cover w-full h-full" />
               </button>
             ))}
           </div>
@@ -69,6 +68,6 @@ export default function ProductCard({ product, locale }: { product: Product; loc
           {product.price} {locale === 'ar' ? 'د.ك' : 'KWD'}
         </p>
       </div>
-    </div>
+    </Link>
   );
 }
