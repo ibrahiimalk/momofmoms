@@ -21,11 +21,14 @@ export type Product = {
   id: string;
   name_ar: string;
   name_en: string;
+  description_ar: string;
+  description_en: string;
   price: number;
   category: string;
   category_id: string | null;
   categories?: Category;
   image_url: string;
+  gallery_images: string[];
   in_stock: boolean;
   quantity: number;
   created_at: string;

@@ -5,7 +5,12 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { Trash2, Edit, Plus, X, Check } from 'lucide-react';
 import Image from 'next/image';
 
-const EMPTY_FORM = { name_ar: '', name_en: '', price: '', category_id: '', image_url: '', in_stock: true, quantity: '0' };
+const EMPTY_FORM = {
+  name_ar: '', name_en: '',
+  description_ar: '', description_en: '',
+  price: '', category_id: '', image_url: '',
+  in_stock: true, quantity: '0',
+};
 
 export default function ProductsAdmin() {
   const supabase = createSupabaseBrowser();
@@ -17,7 +22,9 @@ export default function ProductsAdmin() {
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [selling, setSelling] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<(File | null)[]>([null, null, null]);
+  const [galleryUrls, setGalleryUrls] = useState<string[]>(['', '', '']);
 
   const load = async () => {
     const [{ data: prods }, { data: cats }] = await Promise.all([
@@ -34,7 +41,7 @@ export default function ProductsAdmin() {
 
   const uploadImage = async (file: File): Promise<string> => {
     const ext = file.name.split('.').pop();
-    const path = `products/${Date.now()}.${ext}`;
+    const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error } = await supabase.storage.from('images').upload(path, file);
     if (error) throw error;
     const { data } = supabase.storage.from('images').getPublicUrl(path);
@@ -46,14 +53,26 @@ export default function ProductsAdmin() {
     setSaving(true);
     try {
       let image_url = form.image_url;
-      if (imageFile) image_url = await uploadImage(imageFile);
+      if (mainImageFile) image_url = await uploadImage(mainImageFile);
+
+      // Upload any new gallery images, keep existing URLs for slots with no new file
+      const newGalleryUrls = await Promise.all(
+        galleryFiles.map((file, i) =>
+          file ? uploadImage(file) : Promise.resolve(galleryUrls[i] || '')
+        )
+      );
+      const gallery_images = newGalleryUrls.filter(Boolean);
+
       const payload = {
         name_ar: form.name_ar,
         name_en: form.name_en,
+        description_ar: form.description_ar,
+        description_en: form.description_en,
         price: parseFloat(form.price) || 0,
         quantity: parseInt(form.quantity) || 0,
         category_id: form.category_id,
         image_url,
+        gallery_images,
         in_stock: form.in_stock,
       };
       if (editId) {
@@ -64,7 +83,9 @@ export default function ProductsAdmin() {
       setForm({ ...EMPTY_FORM });
       setEditId(null);
       setShowForm(false);
-      setImageFile(null);
+      setMainImageFile(null);
+      setGalleryFiles([null, null, null]);
+      setGalleryUrls(['', '', '']);
       load();
     } catch {
       alert('Error saving product');
@@ -77,12 +98,17 @@ export default function ProductsAdmin() {
     setForm({
       name_ar: p.name_ar,
       name_en: p.name_en,
+      description_ar: p.description_ar || '',
+      description_en: p.description_en || '',
       price: String(p.price),
       category_id: p.category_id || '',
       image_url: p.image_url,
       in_stock: p.in_stock,
       quantity: String(p.quantity ?? 0),
     });
+    const existing = (p.gallery_images || []).slice(0, 3);
+    setGalleryUrls([existing[0] || '', existing[1] || '', existing[2] || '']);
+    setGalleryFiles([null, null, null]);
     setEditId(p.id);
     setShowForm(true);
   };
@@ -102,13 +128,18 @@ export default function ProductsAdmin() {
     load();
   };
 
+  const removeGallerySlot = (i: number) => {
+    const newFiles = [...galleryFiles]; newFiles[i] = null;
+    const newUrls = [...galleryUrls]; newUrls[i] = '';
+    setGalleryFiles(newFiles);
+    setGalleryUrls(newUrls);
+  };
+
   // Group by category
   const grouped: Record<string, { cat: Category | null; items: Product[] }> = {};
   for (const p of products) {
     const catId = p.category_id || '__none__';
-    if (!grouped[catId]) {
-      grouped[catId] = { cat: p.categories || null, items: [] };
-    }
+    if (!grouped[catId]) grouped[catId] = { cat: (p as any).categories || null, items: [] };
     grouped[catId].items.push(p);
   }
 
@@ -117,7 +148,7 @@ export default function ProductsAdmin() {
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-bold text-gray-800">Products</h1>
         <button
-          onClick={() => { setForm({ ...EMPTY_FORM }); setEditId(null); setShowForm(true); }}
+          onClick={() => { setForm({ ...EMPTY_FORM }); setEditId(null); setGalleryFiles([null,null,null]); setGalleryUrls(['','','']); setMainImageFile(null); setShowForm(true); }}
           className="flex items-center gap-2 bg-pink-500 text-white px-4 py-2 rounded-xl hover:bg-pink-600 text-sm font-medium"
         >
           <Plus size={16} /> Add Product
@@ -149,6 +180,16 @@ export default function ProductsAdmin() {
                 className="w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:border-pink-400" />
             </div>
             <div>
+              <label className="text-xs text-gray-500 font-medium">Description (Arabic)</label>
+              <textarea rows={3} value={form.description_ar} onChange={e => setForm({ ...form, description_ar: e.target.value })}
+                className="w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:border-pink-400 resize-none" dir="rtl" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 font-medium">Description (English)</label>
+              <textarea rows={3} value={form.description_en} onChange={e => setForm({ ...form, description_en: e.target.value })}
+                className="w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:border-pink-400 resize-none" />
+            </div>
+            <div>
               <label className="text-xs text-gray-500 font-medium">Price (KWD)</label>
               <input type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })}
                 className="w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:border-pink-400" />
@@ -160,34 +201,62 @@ export default function ProductsAdmin() {
             </div>
             <div>
               <label className="text-xs text-gray-500 font-medium">Category <span className="text-red-400">*</span></label>
-              <select
-                value={form.category_id}
-                onChange={e => setForm({ ...form, category_id: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:border-pink-400 bg-white"
-              >
+              <select value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })}
+                className="w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:border-pink-400 bg-white">
                 <option value="">— Select a category —</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name_en} / {cat.name_ar}</option>
                 ))}
               </select>
-              {categories.length === 0 && (
-                <p className="text-xs text-red-400 mt-1">No categories yet. <a href="/admin/categories" className="underline">Create one first.</a></p>
-              )}
             </div>
             <div className="flex items-center gap-2 pt-5">
               <input type="checkbox" id="instock" checked={form.in_stock}
                 onChange={e => setForm({ ...form, in_stock: e.target.checked })} />
               <label htmlFor="instock" className="text-sm text-gray-700">In Stock</label>
             </div>
+
+            {/* Main image */}
             <div className="sm:col-span-2">
-              <label className="text-xs text-gray-500 font-medium">Product Image</label>
-              <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)}
+              <label className="text-xs text-gray-500 font-medium">Main Image</label>
+              <input type="file" accept="image/*" onChange={e => setMainImageFile(e.target.files?.[0] || null)}
                 className="w-full border rounded-lg px-3 py-2 mt-1 text-sm" />
-              {form.image_url && !imageFile && (
-                <p className="text-xs text-gray-400 mt-1">Current: {form.image_url.split('/').pop()}</p>
+              {form.image_url && !mainImageFile && (
+                <div className="mt-2 flex items-center gap-2">
+                  <Image src={form.image_url} alt="main" width={60} height={60} className="rounded-lg object-cover" />
+                  <span className="text-xs text-gray-400">Current main image</span>
+                </div>
               )}
             </div>
+
+            {/* Gallery images */}
+            <div className="sm:col-span-2">
+              <label className="text-xs text-gray-500 font-medium mb-2 block">Gallery Images (up to 3)</label>
+              <div className="grid grid-cols-3 gap-3">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="border rounded-xl p-3 bg-gray-50 relative">
+                    <p className="text-xs text-gray-400 mb-2">Photo {i + 1}</p>
+                    {galleryUrls[i] && !galleryFiles[i] ? (
+                      <div className="relative mb-2">
+                        <Image src={galleryUrls[i]} alt={`gallery ${i+1}`} width={80} height={80} className="rounded-lg object-cover" />
+                        <button onClick={() => removeGallerySlot(i)}
+                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                          ×
+                        </button>
+                      </div>
+                    ) : null}
+                    <input type="file" accept="image/*"
+                      onChange={e => {
+                        const files = [...galleryFiles];
+                        files[i] = e.target.files?.[0] || null;
+                        setGalleryFiles(files);
+                      }}
+                      className="w-full text-xs" />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+
           <button onClick={handleSave} disabled={saving}
             className="mt-4 flex items-center gap-2 bg-pink-500 text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-pink-600 disabled:opacity-60">
             <Check size={16} /> {saving ? 'Saving…' : 'Save Product'}
@@ -234,6 +303,9 @@ export default function ProductsAdmin() {
                             <div>
                               <p className="font-medium text-gray-800">{p.name_en}</p>
                               <p className="text-gray-400 text-xs" dir="rtl">{p.name_ar}</p>
+                              {(p.gallery_images?.length > 0) && (
+                                <p className="text-xs text-blue-400 mt-0.5">{p.gallery_images.length} gallery photo{p.gallery_images.length > 1 ? 's' : ''}</p>
+                              )}
                             </div>
                           </div>
                         </td>
