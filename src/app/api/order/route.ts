@@ -116,25 +116,27 @@ export async function POST(req: NextRequest) {
       if (!Number.isInteger(i.quantity) || i.quantity < 1 || i.quantity > 50) return NextResponse.json({ error: 'Invalid quantity' }, { status: 400 });
     }
 
+    // Collapse duplicate lines for the same product so stock checks see the true total
+    const quantityById = new Map<string, number>();
+    for (const i of requested) {
+      quantityById.set(i.id, (quantityById.get(i.id) ?? 0) + i.quantity);
+    }
+
     // Fetch authoritative product data — never trust price/name/stock from the client
-    const productIds = requested.map(i => i.id);
+    const productIds = [...quantityById.keys()];
     const { data: products, error: productsErr } = await supabase
       .from('products')
       .select('id, name_ar, name_en, price, image_url, in_stock, quantity')
       .in('id', productIds);
 
-    if (productsErr || !products || products.length !== new Set(productIds).size) {
+    if (productsErr || !products || products.length !== productIds.length) {
       return NextResponse.json({ error: 'One or more products not found' }, { status: 400 });
     }
 
-    const productMap = new Map(products.map(p => [p.id, p]));
-    const verifiedItems: OrderItem[] = requested.map(i => {
-      const p = productMap.get(i.id)!;
-      return {
-        id: p.id, name_ar: p.name_ar, name_en: p.name_en, price: p.price,
-        quantity: i.quantity, image_url: p.image_url, stock_quantity: p.quantity,
-      };
-    });
+    const verifiedItems: OrderItem[] = products.map(p => ({
+      id: p.id, name_ar: p.name_ar, name_en: p.name_en, price: p.price,
+      quantity: quantityById.get(p.id)!, image_url: p.image_url, stock_quantity: p.quantity,
+    }));
 
     for (const item of verifiedItems) {
       if (!item.stock_quantity || item.quantity > item.stock_quantity) {
