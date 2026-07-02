@@ -84,7 +84,6 @@ export default async function ProductPage({ params }: { params: { locale: string
 
             <AddToCartButton
               product={product}
-              locale={locale}
               cartLabel={locale === 'ar' ? 'أضف إلى السلة' : 'Add to Cart'}
               addedLabel={locale === 'ar' ? 'تمت الإضافة ✓' : 'Added to Cart ✓'}
               soldOutLabel={locale === 'ar' ? 'نفذ المخزون' : 'Sold Out'}
