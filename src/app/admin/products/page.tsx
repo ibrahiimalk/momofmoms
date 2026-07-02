@@ -139,7 +139,7 @@ export default function ProductsAdmin() {
   const grouped: Record<string, { cat: Category | null; items: Product[] }> = {};
   for (const p of products) {
     const catId = p.category_id || '__none__';
-    if (!grouped[catId]) grouped[catId] = { cat: (p as any).categories || null, items: [] };
+    if (!grouped[catId]) grouped[catId] = { cat: p.categories || null, items: [] };
     grouped[catId].items.push(p);
   }
 
