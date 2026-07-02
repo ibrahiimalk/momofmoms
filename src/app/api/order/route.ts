@@ -100,7 +100,49 @@ export async function POST(req: NextRequest) {
     if (!area || !block || !street || !house) return NextResponse.json({ error: 'Address incomplete' }, { status: 400 });
     if (!Array.isArray(items) || items.length === 0) return NextResponse.json({ error: 'No items' }, { status: 400 });
 
-    const total = (items as OrderItem[]).reduce((s, i) => s + i.price * i.quantity, 0);
+    // Rate limiting: max 3 orders per phone per hour
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count } = await supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('phone', phone.trim())
+      .gte('created_at', oneHourAgo);
+    if ((count ?? 0) >= 3) return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+
+    // Validate item shape and quantities from the client
+    const requested = items as { id: string; quantity: number }[];
+    for (const i of requested) {
+      if (!i.id || typeof i.id !== 'string') return NextResponse.json({ error: 'Invalid item' }, { status: 400 });
+      if (!Number.isInteger(i.quantity) || i.quantity < 1 || i.quantity > 50) return NextResponse.json({ error: 'Invalid quantity' }, { status: 400 });
+    }
+
+    // Fetch authoritative product data — never trust price/name/stock from the client
+    const productIds = requested.map(i => i.id);
+    const { data: products, error: productsErr } = await supabase
+      .from('products')
+      .select('id, name_ar, name_en, price, image_url, in_stock, quantity')
+      .in('id', productIds);
+
+    if (productsErr || !products || products.length !== new Set(productIds).size) {
+      return NextResponse.json({ error: 'One or more products not found' }, { status: 400 });
+    }
+
+    const productMap = new Map(products.map(p => [p.id, p]));
+    const verifiedItems: OrderItem[] = requested.map(i => {
+      const p = productMap.get(i.id)!;
+      return {
+        id: p.id, name_ar: p.name_ar, name_en: p.name_en, price: p.price,
+        quantity: i.quantity, image_url: p.image_url, stock_quantity: p.quantity,
+      };
+    });
+
+    for (const item of verifiedItems) {
+      if (!item.stock_quantity || item.quantity > item.stock_quantity) {
+        return NextResponse.json({ error: `Insufficient stock for ${item.name_en}` }, { status: 400 });
+      }
+    }
+
+    const total = verifiedItems.reduce((s, i) => s + i.price * i.quantity, 0);
 
     // Insert order
     const { data: order, error: orderErr } = await supabase
@@ -120,7 +162,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Insert order items
-    const orderItems = (items as OrderItem[]).map(i => ({
+    const orderItems = verifiedItems.map(i => ({
       order_id: order.id,
       product_id: i.id,
       name_ar: i.name_ar,
@@ -137,14 +179,14 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: FROM, to: [ADMIN_EMAIL],
       subject: `🛍️ New Order — ${name.trim()} (${total.toFixed(3)} KWD)`,
-      html: adminEmailHtml(name.trim(), email.trim(), phone.trim(), items, total, addressObj),
+      html: adminEmailHtml(name.trim(), email.trim(), phone.trim(), verifiedItems, total, addressObj),
     });
 
     // Send customer confirmation
     await resend.emails.send({
       from: FROM, to: [email.trim()],
       subject: 'تم استلام طلبك — MomOfMoms 🛍️',
-      html: customerEmailHtml(name.trim(), items, total, addressObj),
+      html: customerEmailHtml(name.trim(), verifiedItems, total, addressObj),
     });
 
     return NextResponse.json({ ok: true, orderId: order.id });
