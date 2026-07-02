@@ -101,13 +101,13 @@ export async function POST(req: NextRequest) {
     if (!Array.isArray(items) || items.length === 0) return NextResponse.json({ error: 'No items' }, { status: 400 });
 
     // Rate limiting: max 3 orders per phone per hour
+    // Uses a SECURITY DEFINER RPC because anon has no SELECT on orders (PII protection)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count } = await supabase
-      .from('orders')
-      .select('*', { count: 'exact', head: true })
-      .eq('phone', phone.trim())
-      .gte('created_at', oneHourAgo);
-    if ((count ?? 0) >= 3) return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    const { data: recentCount } = await supabase.rpc('count_recent_orders_by_phone', {
+      p_phone: phone.trim(),
+      p_since: oneHourAgo,
+    });
+    if ((recentCount ?? 0) >= 3) return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
 
     // Validate item shape and quantities from the client
     const requested = items as { id: string; quantity: number }[];

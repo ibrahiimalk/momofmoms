@@ -116,14 +116,14 @@ export async function POST(req: NextRequest) {
     const safeNotes = notes ? esc(notes.trim()) : '';
 
     // Basic rate limiting: max 3 submissions per phone per hour
+    // Uses a SECURITY DEFINER RPC because anon has no SELECT on appointments (PII protection)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count } = await supabase
-      .from('appointments')
-      .select('*', { count: 'exact', head: true })
-      .eq('phone', phone.trim())
-      .gte('created_at', oneHourAgo);
+    const { data: recentCount } = await supabase.rpc('count_recent_appointments_by_phone', {
+      p_phone: phone.trim(),
+      p_since: oneHourAgo,
+    });
 
-    if ((count ?? 0) >= 3) {
+    if ((recentCount ?? 0) >= 3) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
