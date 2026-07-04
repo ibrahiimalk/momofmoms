@@ -23,11 +23,11 @@ export const metadata: Metadata = {
   description: 'Your trusted partner in pregnancy and motherhood. Pregnancy calculator, baby products, awake windows, and appointment booking for new moms.',
   keywords: ['pregnancy', 'maternity', 'baby', 'motherhood', 'حمل', 'أمومة', 'pregnancy calculator', 'baby clothes', 'mom consultant'],
   authors: [{ name: 'MomOfMoms' }],
-  metadataBase: new URL('https://momofmoms.vercel.app'),
+  metadataBase: new URL('https://momofmomskw.com'),
   openGraph: {
     title: 'MomOfMoms — مستشارتك في الأمومة',
     description: 'Your trusted partner in pregnancy and motherhood.',
-    url: 'https://momofmoms.vercel.app',
+    url: 'https://momofmomskw.com',
     siteName: 'MomOfMoms',
     locale: 'ar_SA',
     alternateLocale: 'en_US',
@@ -39,10 +39,10 @@ export const metadata: Metadata = {
     description: 'Your trusted partner in pregnancy and motherhood.',
   },
   alternates: {
-    canonical: 'https://momofmoms.vercel.app/ar',
+    canonical: 'https://momofmomskw.com/ar',
     languages: {
-      'ar': 'https://momofmoms.vercel.app/ar',
-      'en': 'https://momofmoms.vercel.app/en',
+      'ar': 'https://momofmomskw.com/ar',
+      'en': 'https://momofmomskw.com/en',
     },
   },
 };

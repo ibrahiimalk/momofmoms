@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: '/admin/',
     },
-    sitemap: 'https://momofmoms.vercel.app/sitemap.xml',
+    sitemap: 'https://momofmomskw.com/sitemap.xml',
   };
 }

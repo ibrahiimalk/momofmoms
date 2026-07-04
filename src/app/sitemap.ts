@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-const BASE = 'https://momofmoms.vercel.app';
+const BASE = 'https://momofmomskw.com';
 const locales = ['ar', 'en'];
 
 const routes = [
