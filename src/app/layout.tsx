@@ -47,6 +47,9 @@ export const metadata: Metadata = {
       'en': 'https://momofmomskw.com/en',
     },
   },
+  icons: {
+    apple: '/apple-icon.png',
+  },
 };
 
 export default function RootLayout({
