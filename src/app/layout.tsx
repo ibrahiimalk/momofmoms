@@ -32,11 +32,13 @@ export const metadata: Metadata = {
     locale: 'ar_SA',
     alternateLocale: 'en_US',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'MomOfMoms' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MomOfMoms — مستشارتك في الأمومة',
     description: 'Your trusted partner in pregnancy and motherhood.',
+    images: ['/og-image.png'],
   },
   alternates: {
     canonical: 'https://momofmomskw.com/ar',
