@@ -4,12 +4,15 @@ import { translations, Locale } from './i18n';
 export type ContentMap = Record<string, string>;
 
 export async function getContent(locale: Locale): Promise<ContentMap> {
+  const fallback = getFallback(locale);
   try {
     const { data } = await supabase.from('site_content').select('key, ar, en');
-    if (!data || data.length === 0) return getFallback(locale);
-    return Object.fromEntries(data.map((row) => [row.key, locale === 'ar' ? row.ar : row.en]));
+    if (!data || data.length === 0) return fallback;
+    const dbContent = Object.fromEntries(data.map((row) => [row.key, locale === 'ar' ? row.ar : row.en]));
+    // Merge so newly added keys still render before they're seeded into the DB
+    return { ...fallback, ...dbContent };
   } catch {
-    return getFallback(locale);
+    return fallback;
   }
 }
 
