@@ -12,7 +12,8 @@ function calculatePregnancy(lmpDate: Date) {
   let trimester = 1;
   if (weeks >= 13 && weeks < 27) trimester = 2;
   else if (weeks >= 27) trimester = 3;
-  return { dueDate, weeks, days, trimester };
+  const month = Math.min(Math.max(Math.floor(diffDays / 30.4) + 1, 1), 9);
+  return { dueDate, weeks, days, trimester, month };
 }
 
 export default function PregnancyCalcClient({ locale, content }: { locale: Locale; content: Record<string, string> }) {
@@ -68,6 +69,12 @@ export default function PregnancyCalcClient({ locale, content }: { locale: Local
             <p className="text-3xl font-bold" style={{ color: '#5B21B6' }}>
               {result.weeks} {c['pregcalc.weeks']}
               {result.days > 0 && <span className="text-lg font-medium"> + {result.days} {c['pregcalc.days']}</span>}
+            </p>
+          </div>
+          <div className="rounded-2xl p-5 text-center" style={{ background: '#EAF4FF', border: '2px solid #C8DFF0' }}>
+            <p className="text-sm font-medium mb-1" style={{ color: '#2563EB' }}>{c['pregcalc.month']}</p>
+            <p className="text-2xl font-bold" style={{ color: '#1D4ED8' }}>
+              {c['pregcalc.monthValue']} {result.month} / 9
             </p>
           </div>
           <div className={`border-2 rounded-2xl p-5 text-center ${trimesterColor}`}>

@@ -84,6 +84,8 @@ function getFallback(locale: Locale): ContentMap {
     'pregcalc.weeks': locale === 'ar' ? 'أسابيع' : 'weeks',
     'pregcalc.days': locale === 'ar' ? 'أيام' : 'days',
     'pregcalc.complete': locale === 'ar' ? 'مكتملة' : 'complete',
+    'pregcalc.month': locale === 'ar' ? 'شهر الحمل' : 'Pregnancy Month',
+    'pregcalc.monthValue': locale === 'ar' ? 'الشهر' : 'Month',
     // Shop page
     'shop.empty': locale === 'ar' ? 'لا توجد منتجات متاحة حالياً' : 'No products available yet',
   };
