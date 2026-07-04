@@ -28,7 +28,7 @@ export default function HomeCalcWidget({ locale, content }: { locale: Locale; co
     if (val) {
       const res = calculatePregnancy(new Date(val));
       setResult(res);
-      const formatted = res.dueDate.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
+      const formatted = res.dueDate.toLocaleDateString(locale === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-US', {
         month: 'short', day: 'numeric', year: 'numeric',
       });
       window.dispatchEvent(new CustomEvent('momofmoms:duedate', { detail: formatted }));
@@ -95,7 +95,7 @@ export default function HomeCalcWidget({ locale, content }: { locale: Locale; co
                       {c['calc.dueDate']}
                     </p>
                     <p className="text-xl font-bold" style={{ color: '#2D1B20' }}>
-                      {result.dueDate.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
+                      {result.dueDate.toLocaleDateString(locale === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-US', {
                         month: 'short', day: 'numeric', year: 'numeric'
                       })}
                     </p>

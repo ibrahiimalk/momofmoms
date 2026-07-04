@@ -86,7 +86,7 @@ export default function OrdersAdmin() {
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="font-bold text-sm" style={{ color: '#BB5E86' }}>{Number(order.total_price).toFixed(3)} KWD</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{new Date(order.created_at).toLocaleDateString()}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{new Date(order.created_at).toLocaleDateString('en-US-u-ca-gregory')}</p>
                 </div>
                 <button onClick={() => setExpanded(expanded === order.id ? null : order.id)}
                   className="p-2 hover:bg-gray-50 rounded-xl flex-shrink-0">

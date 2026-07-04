@@ -58,7 +58,7 @@ export default function PregnancyCalcClient({ locale, content }: { locale: Local
           <div className="rounded-2xl p-5 text-center" style={{ background: '#FAE0EC', border: '2px solid #F0C0D8' }}>
             <p className="text-sm font-medium mb-1" style={{ color: '#BB5E86' }}>{c['pregcalc.dueDate']}</p>
             <p className="text-3xl font-bold" style={{ color: '#2D1B20' }}>
-              {result.dueDate.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
+              {result.dueDate.toLocaleDateString(locale === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-US', {
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
               })}
             </p>
