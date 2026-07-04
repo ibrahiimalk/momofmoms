@@ -85,7 +85,15 @@ function getFallback(locale: Locale): ContentMap {
     'pregcalc.days': locale === 'ar' ? 'أيام' : 'days',
     'pregcalc.complete': locale === 'ar' ? 'مكتملة' : 'complete',
     'pregcalc.month': locale === 'ar' ? 'شهر الحمل' : 'Pregnancy Month',
-    'pregcalc.monthValue': locale === 'ar' ? 'الشهر' : 'Month',
+    'pregcalc.month1': locale === 'ar' ? 'الشهر الأول' : 'First Month',
+    'pregcalc.month2': locale === 'ar' ? 'الشهر الثاني' : 'Second Month',
+    'pregcalc.month3': locale === 'ar' ? 'الشهر الثالث' : 'Third Month',
+    'pregcalc.month4': locale === 'ar' ? 'الشهر الرابع' : 'Fourth Month',
+    'pregcalc.month5': locale === 'ar' ? 'الشهر الخامس' : 'Fifth Month',
+    'pregcalc.month6': locale === 'ar' ? 'الشهر السادس' : 'Sixth Month',
+    'pregcalc.month7': locale === 'ar' ? 'الشهر السابع' : 'Seventh Month',
+    'pregcalc.month8': locale === 'ar' ? 'الشهر الثامن' : 'Eighth Month',
+    'pregcalc.month9': locale === 'ar' ? 'الشهر التاسع' : 'Ninth Month',
     // Shop page
     'shop.empty': locale === 'ar' ? 'لا توجد منتجات متاحة حالياً' : 'No products available yet',
   };

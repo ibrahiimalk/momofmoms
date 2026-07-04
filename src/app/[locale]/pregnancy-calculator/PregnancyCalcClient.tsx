@@ -74,7 +74,7 @@ export default function PregnancyCalcClient({ locale, content }: { locale: Local
           <div className="rounded-2xl p-5 text-center" style={{ background: '#EAF4FF', border: '2px solid #C8DFF0' }}>
             <p className="text-sm font-medium mb-1" style={{ color: '#2563EB' }}>{c['pregcalc.month']}</p>
             <p className="text-2xl font-bold" style={{ color: '#1D4ED8' }}>
-              {c['pregcalc.monthValue']} {result.month} / 9
+              {c[`pregcalc.month${result.month}`]}
             </p>
           </div>
           <div className={`border-2 rounded-2xl p-5 text-center ${trimesterColor}`}>
