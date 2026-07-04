@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import Link from 'next/link';
 import { Locale } from '@/lib/i18n';
 
 function calculatePregnancy(lmpDate: Date) {
@@ -114,13 +113,6 @@ export default function HomeCalcWidget({ locale, content }: { locale: Locale; co
                     {`${isRTL ? 'حوالي' : 'About'} ${result.weeksLeft} ${c['calc.weeksLeft']}`}
                   </p>
                 </div>
-                <Link
-                  href={`/${locale}/book-appointment`}
-                  className="block w-full text-center py-4 rounded-2xl font-semibold text-white transition-opacity hover:opacity-90"
-                  style={{ background: '#2D1B20' }}
-                >
-                  {c['calc.bookBtn']}
-                </Link>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-full py-10 gap-3" style={{ color: '#C0A0B0' }}>
