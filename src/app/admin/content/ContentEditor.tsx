@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 type Row = { key: string; ar: string; en: string; label: string };
 
@@ -116,6 +116,7 @@ export default function ContentEditor({ initial }: { initial: Row[] }) {
   const [rows, setRows] = useState<Row[]>(initial);
   const [saving, setSaving] = useState<string | null>(null);
   const [saved, setSaved] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
   const [activePage, setActivePage] = useState('home');
 
   const getValue = (key: string, lang: 'ar' | 'en') =>
@@ -130,8 +131,14 @@ export default function ContentEditor({ initial }: { initial: Row[] }) {
     const row = rows.find(r => r.key === key);
     if (!row) return;
     setSaving(key);
-    await supabase.from('site_content').upsert({ key, ar: row.ar, en: row.en });
+    setError(null);
+    const supabase = createSupabaseBrowser();
+    const { error: saveError } = await supabase.from('site_content').upsert({ key, ar: row.ar, en: row.en });
     setSaving(null);
+    if (saveError) {
+      setError(`Failed to save "${key}": ${saveError.message}`);
+      return;
+    }
     setSaved(s => new Set(s).add(key));
   };
 
@@ -162,6 +169,11 @@ export default function ContentEditor({ initial }: { initial: Row[] }) {
 
       {/* Content area */}
       <div className="flex-1">
+        {error && (
+          <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
         {activeSections && (
           <>
             <h2 className="text-lg font-bold text-gray-800 mb-4">
