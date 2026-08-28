@@ -1,19 +1,20 @@
 export const dynamic = 'force-dynamic';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { getDb } from '@/lib/db';
 import { ShoppingBag, Moon, Calendar, FileText } from 'lucide-react';
 
 async function getStats() {
   try {
+    const db = getDb();
     const [products, windows, appointments] = await Promise.all([
-      supabase.from('products').select('id', { count: 'exact', head: true }),
-      supabase.from('awake_windows').select('id', { count: 'exact', head: true }),
-      supabase.from('appointments').select('id', { count: 'exact', head: true }),
+      db.prepare('SELECT COUNT(*) as count FROM products').first<{ count: number }>(),
+      db.prepare('SELECT COUNT(*) as count FROM awake_windows').first<{ count: number }>(),
+      db.prepare('SELECT COUNT(*) as count FROM appointments').first<{ count: number }>(),
     ]);
     return {
-      products: products.count || 0,
-      windows: windows.count || 0,
-      appointments: appointments.count || 0,
+      products: products?.count || 0,
+      windows: windows?.count || 0,
+      appointments: appointments?.count || 0,
     };
   } catch {
     return { products: 0, windows: 0, appointments: 0 };
@@ -48,10 +49,9 @@ export default async function AdminDashboard() {
       <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
         <h2 className="font-semibold text-blue-700 mb-2">📋 Setup Checklist</h2>
         <ul className="text-sm text-blue-600 space-y-1 list-disc list-inside">
-          <li>Connect your Supabase project in <code>.env.local</code></li>
-          <li>Run the SQL schema in your Supabase dashboard</li>
           <li>Add your first products</li>
           <li>Add awake window entries with images</li>
+          <li>Review and edit website text under Website Text</li>
         </ul>
       </div>
     </div>

@@ -1,17 +1,16 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Appointment } from '@/lib/supabase';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { Appointment } from '@/lib/db';
 import { Check, X, Clock } from 'lucide-react';
 
 export default function AppointmentsAdmin() {
-  const supabase = createSupabaseBrowser();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const { data } = await supabase.from('appointments').select('*').order('created_at', { ascending: false });
-    setAppointments(data || []);
+    const res = await fetch('/api/admin/appointments');
+    const { appointments } = await res.json();
+    setAppointments(appointments || []);
     setLoading(false);
   };
 
@@ -19,7 +18,11 @@ export default function AppointmentsAdmin() {
   useEffect(() => { load(); }, []);
 
   const updateStatus = async (id: string, status: Appointment['status']) => {
-    await supabase.from('appointments').update({ status }).eq('id', id);
+    await fetch('/api/admin/appointments', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status }),
+    });
     load();
   };
 

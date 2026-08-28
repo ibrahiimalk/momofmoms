@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { createClient } from '@supabase/supabase-js';
+import { getDb, getEnv } from '@/lib/db';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+export const dynamic = 'force-dynamic';
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'ibrahiim.alk@gmail.com';
 const FROM = 'MomOfMoms <noreply@momofmomskw.com>';
 
 function esc(s: string) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+}
+
+function waLink(phone: string): string {
+  return `https://wa.me/${phone.replace(/[^\d]/g, '')}`;
 }
 
 type OrderItem = { id: string; name_ar: string; name_en: string; price: number; quantity: number; image_url: string; stock_quantity: number };
@@ -73,7 +72,7 @@ function adminEmailHtml(name: string, email: string, phone: string, items: Order
       <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
         <tr><td style="color:#888;padding:6px 0;font-size:14px;width:80px;">Name</td><td style="font-weight:600;font-size:14px;">${esc(name)}</td></tr>
         <tr><td style="color:#888;padding:6px 0;font-size:14px;">Email</td><td style="font-size:14px;">${esc(email)}</td></tr>
-        <tr><td style="color:#888;padding:6px 0;font-size:14px;">Phone</td><td style="font-size:14px;">${esc(phone)}</td></tr>
+        <tr><td style="color:#888;padding:6px 0;font-size:14px;">Phone</td><td style="font-size:14px;"><a href="${waLink(phone)}" style="color:#25D366;text-decoration:none;font-weight:600;">${esc(phone)} 💬</a></td></tr>
         <tr><td style="color:#888;padding:6px 0;font-size:14px;">Address</td><td style="font-size:14px;">Area: ${esc(address.area)}, Block: ${esc(address.block)}, Street: ${esc(address.street)}${address.avenue ? ', Ave: ' + esc(address.avenue) : ''}, House: ${esc(address.house)}</td></tr>
       </table>
       <div style="background:#FDF0EC;border-radius:12px;padding:16px 20px;margin-bottom:16px;">
@@ -100,14 +99,18 @@ export async function POST(req: NextRequest) {
     if (!area || !block || !street || !house) return NextResponse.json({ error: 'Address incomplete' }, { status: 400 });
     if (!Array.isArray(items) || items.length === 0) return NextResponse.json({ error: 'No items' }, { status: 400 });
 
+    const db = getDb();
+    const { RESEND_API_KEY, ADMIN_EMAIL } = getEnv();
+    const resend = new Resend(RESEND_API_KEY);
+    const adminEmails = (ADMIN_EMAIL ?? 'ibrahiim.alk@gmail.com').split(',').map(e => e.trim()).filter(Boolean);
+
     // Rate limiting: max 3 orders per phone per hour
-    // Uses a SECURITY DEFINER RPC because anon has no SELECT on orders (PII protection)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { data: recentCount } = await supabase.rpc('count_recent_orders_by_phone', {
-      p_phone: phone.trim(),
-      p_since: oneHourAgo,
-    });
-    if ((recentCount ?? 0) >= 3) return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    const countRow = await db
+      .prepare('SELECT COUNT(*) as count FROM orders WHERE phone = ? AND created_at >= ?')
+      .bind(phone.trim(), oneHourAgo)
+      .first<{ count: number }>();
+    if ((countRow?.count ?? 0) >= 3) return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
 
     // Validate item shape and quantities from the client
     const requested = items as { id: string; quantity: number }[];
@@ -124,16 +127,17 @@ export async function POST(req: NextRequest) {
 
     // Fetch authoritative product data — never trust price/name/stock from the client
     const productIds = Array.from(quantityById.keys());
-    const { data: products, error: productsErr } = await supabase
-      .from('products')
-      .select('id, name_ar, name_en, price, image_url, in_stock, quantity')
-      .in('id', productIds);
+    const placeholders = productIds.map(() => '?').join(',');
+    const { results: products } = await db
+      .prepare(`SELECT id, name_ar, name_en, price, image_url, in_stock, quantity FROM products WHERE id IN (${placeholders})`)
+      .bind(...productIds)
+      .all<{ id: string; name_ar: string; name_en: string; price: number; image_url: string; in_stock: number; quantity: number }>();
 
-    if (productsErr || !products || products.length !== productIds.length) {
+    if (!products || products.length !== productIds.length) {
       return NextResponse.json({ error: 'One or more products not found' }, { status: 400 });
     }
 
-    const verifiedItems: OrderItem[] = products.map(p => ({
+    const verifiedItems: OrderItem[] = products.map((p: { id: string; name_ar: string; name_en: string; price: number; image_url: string; quantity: number }) => ({
       id: p.id, name_ar: p.name_ar, name_en: p.name_en, price: p.price,
       quantity: quantityById.get(p.id)!, image_url: p.image_url, stock_quantity: p.quantity,
     }));
@@ -146,40 +150,35 @@ export async function POST(req: NextRequest) {
 
     const total = verifiedItems.reduce((s, i) => s + i.price * i.quantity, 0);
 
-    // Insert order — generate the id ourselves so we never need SELECT-after-INSERT permission
     const orderId = crypto.randomUUID();
-    const { error: orderErr } = await supabase
-      .from('orders')
-      .insert([{
-        id: orderId,
-        name: name.trim(), email: email.trim(), phone: phone.trim(),
-        area: area.trim(), block: block.trim(), street: street.trim(),
-        avenue: avenue?.trim() || null, house: house.trim(),
-        total_price: total, status: 'pending',
-      }]);
-
-    if (orderErr) {
+    try {
+      await db.prepare(`
+        INSERT INTO orders (id, name, email, phone, area, block, street, avenue, house, total_price, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        orderId, name.trim(), email.trim(), phone.trim(),
+        area.trim(), block.trim(), street.trim(),
+        avenue?.trim() || null, house.trim(), total, 'pending'
+      ).run();
+    } catch (orderErr) {
       console.error('Order insert error:', orderErr);
       return NextResponse.json({ error: 'DB failed' }, { status: 500 });
     }
 
     // Insert order items
-    const orderItems = verifiedItems.map(i => ({
-      order_id: orderId,
-      product_id: i.id,
-      name_ar: i.name_ar,
-      name_en: i.name_en,
-      price: i.price,
-      quantity: i.quantity,
-      image_url: i.image_url || null,
-    }));
-    await supabase.from('order_items').insert(orderItems);
+    const itemStatements = verifiedItems.map(i =>
+      db.prepare(`
+        INSERT INTO order_items (id, order_id, product_id, name_ar, name_en, price, quantity, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(crypto.randomUUID(), orderId, i.id, i.name_ar, i.name_en, i.price, i.quantity, i.image_url || null)
+    );
+    await db.batch(itemStatements);
 
     const addressObj = { area: area.trim(), block: block.trim(), street: street.trim(), avenue: avenue?.trim(), house: house.trim() };
 
     // Send admin email
     await resend.emails.send({
-      from: FROM, to: [ADMIN_EMAIL],
+      from: FROM, to: adminEmails,
       subject: `🛍️ New Order — ${name.trim()} (${total.toFixed(3)} KWD)`,
       html: adminEmailHtml(name.trim(), email.trim(), phone.trim(), verifiedItems, total, addressObj),
     });

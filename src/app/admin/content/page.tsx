@@ -1,10 +1,11 @@
 export const dynamic = 'force-dynamic';
-import { supabase } from '@/lib/supabase';
+import { getDb } from '@/lib/db';
 import ContentEditor from './ContentEditor';
 
 export default async function ContentPage() {
-  const { data } = await supabase.from('site_content').select('key, ar, en').order('key');
-  const rows = (data || []).map((r) => ({ ...r, label: r.key }));
+  const db = getDb();
+  const { results } = await db.prepare('SELECT key, ar, en FROM site_content ORDER BY key').all<{ key: string; ar: string; en: string }>();
+  const rows = (results || []).map((r: { key: string; ar: string; en: string }) => ({ ...r, label: r.key }));
 
   return (
     <div>

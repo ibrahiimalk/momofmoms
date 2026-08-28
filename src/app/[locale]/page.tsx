@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Locale } from '@/lib/i18n';
-import { supabase } from '@/lib/supabase';
+import { getDb, normalizeProduct } from '@/lib/db';
 import { getContent } from '@/lib/content';
 import ProductCard from '@/components/ui/ProductCard';
 import HomeCalcWidget from '@/components/ui/HomeCalcWidget';
@@ -10,12 +10,9 @@ import HeroDueDateBadge from '@/components/ui/HeroDueDateBadge';
 
 async function getFeaturedProducts() {
   try {
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .eq('in_stock', true)
-      .limit(6);
-    return data || [];
+    const db = getDb();
+    const { results } = await db.prepare('SELECT * FROM products WHERE in_stock = 1 LIMIT 6').all<Record<string, unknown>>();
+    return (results || []).map(normalizeProduct);
   } catch {
     return [];
   }

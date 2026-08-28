@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { verifySessionCookie } from '@/lib/auth';
 
 const locales = ['ar', 'en'];
 const defaultLocale = 'ar';
@@ -17,28 +18,14 @@ export async function middleware(request: NextRequest) {
     // Login page is always accessible
     if (pathname === '/admin/login') return NextResponse.next();
 
-    // All other admin routes require auth
-    const response = NextResponse.next();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() { return request.cookies.getAll(); },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
-            );
-          },
-        },
-      }
-    );
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    // All other admin routes require a valid session cookie
+    const { env } = await getCloudflareContext({ async: true });
+    const secret = (env as unknown as { SESSION_SECRET: string }).SESSION_SECRET;
+    const adminId = await verifySessionCookie(request.headers.get('cookie'), secret);
+    if (!adminId) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
-    return response;
+    return NextResponse.next();
   }
 
   // Locale redirect for public routes

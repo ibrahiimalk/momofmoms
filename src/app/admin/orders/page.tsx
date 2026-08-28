@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { Package, Phone, Mail, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 
 type OrderItem = { id: string; name_en: string; name_ar: string; price: number; quantity: number; image_url: string };
@@ -19,18 +18,15 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function OrdersAdmin() {
-  const supabase = createSupabaseBrowser();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
 
   const load = async () => {
-    const { data } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .order('created_at', { ascending: false });
-    setOrders(data || []);
+    const res = await fetch('/api/admin/orders');
+    const { orders } = await res.json();
+    setOrders(orders || []);
     setLoading(false);
   };
 
@@ -38,7 +34,11 @@ export default function OrdersAdmin() {
 
   const updateStatus = async (id: string, status: string) => {
     setUpdating(id);
-    await supabase.from('orders').update({ status }).eq('id', id);
+    await fetch('/api/admin/orders', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status }),
+    });
     setUpdating(null);
     load();
   };

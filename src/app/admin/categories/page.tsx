@@ -1,11 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Category } from '@/lib/supabase';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { Category } from '@/lib/db';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
 
 export default function CategoriesAdmin() {
-  const supabase = createSupabaseBrowser();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [nameAr, setNameAr] = useState('');
@@ -13,8 +11,9 @@ export default function CategoriesAdmin() {
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
-    const { data } = await supabase.from('categories').select('*').order('order_index').order('created_at');
-    setCategories(data || []);
+    const res = await fetch('/api/admin/categories');
+    const { categories } = await res.json();
+    setCategories(categories || []);
     setLoading(false);
   };
 
@@ -25,7 +24,11 @@ export default function CategoriesAdmin() {
     if (!nameAr.trim() || !nameEn.trim()) return;
     setSaving(true);
     const order_index = categories.length;
-    await supabase.from('categories').insert([{ name_ar: nameAr.trim(), name_en: nameEn.trim(), order_index }]);
+    await fetch('/api/admin/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name_ar: nameAr.trim(), name_en: nameEn.trim(), order_index }),
+    });
     setNameAr('');
     setNameEn('');
     setSaving(false);
@@ -34,7 +37,11 @@ export default function CategoriesAdmin() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this category? Products linked to it will become uncategorized.')) return;
-    await supabase.from('categories').delete().eq('id', id);
+    await fetch('/api/admin/categories', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
     load();
   };
 

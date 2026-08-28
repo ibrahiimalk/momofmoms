@@ -1,14 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { AwakeWindow } from '@/lib/supabase';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { AwakeWindow } from '@/lib/db';
 import { Trash2, Edit, Plus, X, Check, GripVertical } from 'lucide-react';
 import Image from 'next/image';
 
 const EMPTY = { label_ar: '', label_en: '', image_url: '', order_index: 0 };
 
 export default function AwakeWindowsAdmin() {
-  const supabase = createSupabaseBrowser();
   const [items, setItems] = useState<AwakeWindow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -18,8 +16,9 @@ export default function AwakeWindowsAdmin() {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const load = async () => {
-    const { data } = await supabase.from('awake_windows').select('*').order('order_index');
-    setItems(data || []);
+    const res = await fetch('/api/admin/awake-windows');
+    const { items } = await res.json();
+    setItems(items || []);
     setLoading(false);
   };
 
@@ -27,11 +26,13 @@ export default function AwakeWindowsAdmin() {
   useEffect(() => { load(); }, []);
 
   const uploadImage = async (file: File): Promise<string> => {
-    const ext = file.name.split('.').pop();
-    const path = `awake/${Date.now()}.${ext}`;
-    await supabase.storage.from('images').upload(path, file);
-    const { data } = supabase.storage.from('images').getPublicUrl(path);
-    return data.publicUrl;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'awake');
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
+    if (!res.ok) throw new Error('Upload failed');
+    const { url } = await res.json();
+    return url;
   };
 
   const handleSave = async () => {
@@ -41,9 +42,17 @@ export default function AwakeWindowsAdmin() {
       if (imageFile) image_url = await uploadImage(imageFile);
       const payload = { ...form, image_url, order_index: editId ? form.order_index : items.length };
       if (editId) {
-        await supabase.from('awake_windows').update(payload).eq('id', editId);
+        await fetch('/api/admin/awake-windows', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editId, ...payload }),
+        });
       } else {
-        await supabase.from('awake_windows').insert([payload]);
+        await fetch('/api/admin/awake-windows', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
       }
       setForm({ ...EMPTY });
       setEditId(null);
@@ -62,7 +71,11 @@ export default function AwakeWindowsAdmin() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete?')) return;
-    await supabase.from('awake_windows').delete().eq('id', id);
+    await fetch('/api/admin/awake-windows', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
     load();
   };
 

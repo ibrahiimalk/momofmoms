@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { createClient } from '@supabase/supabase-js';
+import { getDb, getEnv } from '@/lib/db';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+export const dynamic = 'force-dynamic';
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'ibrahiim.alk@gmail.com';
 const FROM = 'MomOfMoms <noreply@momofmomskw.com>';
 
 // Escape HTML to prevent injection in email templates
@@ -19,6 +14,10 @@ function esc(str: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;');
+}
+
+function waLink(phone: string): string {
+  return `https://wa.me/${phone.replace(/[^\d]/g, '')}`;
 }
 
 function isValidEmail(email: string): boolean {
@@ -70,7 +69,7 @@ function adminEmailHtml(name: string, phone: string, email: string, period: { en
     <div style="padding:32px;">
       <table style="width:100%;border-collapse:collapse;">
         <tr><td style="color:#888;padding:8px 0;font-size:14px;width:80px;">Name</td><td style="color:#2D1B20;font-weight:600;font-size:14px;">${name}</td></tr>
-        <tr><td style="color:#888;padding:8px 0;font-size:14px;">Phone</td><td style="font-size:14px;">${phone}</td></tr>
+        <tr><td style="color:#888;padding:8px 0;font-size:14px;">Phone</td><td style="font-size:14px;"><a href="${waLink(phone)}" style="color:#25D366;text-decoration:none;font-weight:600;">${phone} 💬</a></td></tr>
         ${email ? `<tr><td style="color:#888;padding:8px 0;font-size:14px;">Email</td><td style="font-size:14px;">${email}</td></tr>` : ''}
         <tr><td style="color:#888;padding:8px 0;font-size:14px;">Period</td><td style="color:#2D1B20;font-weight:600;font-size:14px;">${period.en}</td></tr>
         ${notes ? `<tr><td style="color:#888;padding:8px 0;font-size:14px;">Notes</td><td style="color:#2D1B20;font-size:14px;">${notes}</td></tr>` : ''}
@@ -115,24 +114,30 @@ export async function POST(req: NextRequest) {
     const safeEmail = email ? esc(email.trim()) : '';
     const safeNotes = notes ? esc(notes.trim()) : '';
 
-    // Basic rate limiting: max 3 submissions per phone per hour
-    // Uses a SECURITY DEFINER RPC because anon has no SELECT on appointments (PII protection)
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { data: recentCount } = await supabase.rpc('count_recent_appointments_by_phone', {
-      p_phone: phone.trim(),
-      p_since: oneHourAgo,
-    });
+    const db = getDb();
+    const { RESEND_API_KEY, ADMIN_EMAIL } = getEnv();
+    const resend = new Resend(RESEND_API_KEY);
+    const adminEmails = (ADMIN_EMAIL ?? 'ibrahiim.alk@gmail.com').split(',').map(e => e.trim()).filter(Boolean);
 
-    if ((recentCount ?? 0) >= 3) {
+    // Basic rate limiting: max 3 submissions per phone per hour
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const countRow = await db
+      .prepare('SELECT COUNT(*) as count FROM appointments WHERE phone = ? AND created_at >= ?')
+      .bind(phone.trim(), oneHourAgo)
+      .first<{ count: number }>();
+
+    if ((countRow?.count ?? 0) >= 3) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
-    // Insert to Supabase
-    const { error: dbError } = await supabase
-      .from('appointments')
-      .insert([{ name: name.trim(), phone: phone.trim(), email: email?.trim() || null, time, date: '', notes: notes?.trim() || '', status: 'pending' }]);
-
-    if (dbError) {
+    // Insert to D1
+    try {
+      await db.prepare(
+        'INSERT INTO appointments (id, name, phone, email, time, date, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+      ).bind(
+        crypto.randomUUID(), name.trim(), phone.trim(), email?.trim() || null, time, '', notes?.trim() || '', 'pending'
+      ).run();
+    } catch (dbError) {
       console.error('DB error:', dbError);
       return NextResponse.json({ error: 'DB failed' }, { status: 500 });
     }
@@ -142,7 +147,7 @@ export async function POST(req: NextRequest) {
     // Admin email
     const { data: adminData, error: adminError } = await resend.emails.send({
       from: FROM,
-      to: [ADMIN_EMAIL],
+      to: adminEmails,
       subject: `📅 New Appointment — ${safeName}`,
       html: adminEmailHtml(safeName, safePhone, safeEmail, period, safeNotes),
     });

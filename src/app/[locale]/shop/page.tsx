@@ -1,17 +1,28 @@
 export const dynamic = 'force-dynamic';
 import { Locale } from '@/lib/i18n';
-import { supabase, Product } from '@/lib/supabase';
+import { getDb, normalizeProduct, Product } from '@/lib/db';
 import ProductCard from '@/components/ui/ProductCard';
 import { getContent } from '@/lib/content';
 
-async function getProducts() {
+async function getProducts(): Promise<Product[]> {
   try {
-    const { data } = await supabase
-      .from('products')
-      .select('*, categories(id, name_ar, name_en, order_index)')
-      .order('category_id')
-      .order('created_at', { ascending: false });
-    return data || [];
+    const db = getDb();
+    const { results } = await db.prepare(`
+      SELECT p.*, c.id as cat_id, c.name_ar as cat_name_ar, c.name_en as cat_name_en, c.order_index as cat_order_index
+      FROM products p LEFT JOIN categories c ON p.category_id = c.id
+      ORDER BY p.category_id, p.created_at DESC
+    `).all<Record<string, unknown>>();
+
+    return (results || []).map((row: Record<string, unknown>) => {
+      const p = normalizeProduct(row);
+      if (row.cat_id) {
+        p.categories = {
+          id: row.cat_id as string, name_ar: row.cat_name_ar as string, name_en: row.cat_name_en as string,
+          order_index: row.cat_order_index as number, created_at: '',
+        };
+      }
+      return p;
+    });
   } catch {
     return [];
   }

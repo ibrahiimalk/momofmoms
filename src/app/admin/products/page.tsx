@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Product, Category } from '@/lib/supabase';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { Product, Category } from '@/lib/db';
 import { Trash2, Edit, Plus, X, Check } from 'lucide-react';
 import Image from 'next/image';
 
@@ -13,7 +12,6 @@ const EMPTY_FORM = {
 };
 
 export default function ProductsAdmin() {
-  const supabase = createSupabaseBrowser();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,12 +25,14 @@ export default function ProductsAdmin() {
   const [galleryUrls, setGalleryUrls] = useState<string[]>(['', '', '']);
 
   const load = async () => {
-    const [{ data: prods }, { data: cats }] = await Promise.all([
-      supabase.from('products').select('*, categories(id, name_ar, name_en)').order('category_id').order('created_at', { ascending: false }),
-      supabase.from('categories').select('*').order('order_index').order('created_at'),
+    const [prodRes, catRes] = await Promise.all([
+      fetch('/api/admin/products'),
+      fetch('/api/admin/categories'),
     ]);
-    setProducts(prods || []);
-    setCategories(cats || []);
+    const { products } = await prodRes.json();
+    const { categories } = await catRes.json();
+    setProducts(products || []);
+    setCategories(categories || []);
     setLoading(false);
   };
 
@@ -40,12 +40,13 @@ export default function ProductsAdmin() {
   useEffect(() => { load(); }, []);
 
   const uploadImage = async (file: File): Promise<string> => {
-    const ext = file.name.split('.').pop();
-    const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error } = await supabase.storage.from('images').upload(path, file);
-    if (error) throw error;
-    const { data } = supabase.storage.from('images').getPublicUrl(path);
-    return data.publicUrl;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'products');
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
+    if (!res.ok) throw new Error('Upload failed');
+    const { url } = await res.json();
+    return url;
   };
 
   const handleSave = async () => {
@@ -76,9 +77,17 @@ export default function ProductsAdmin() {
         in_stock: form.in_stock,
       };
       if (editId) {
-        await supabase.from('products').update(payload).eq('id', editId);
+        await fetch('/api/admin/products', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editId, ...payload }),
+        });
       } else {
-        await supabase.from('products').insert([payload]);
+        await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
       }
       setForm({ ...EMPTY_FORM });
       setEditId(null);
@@ -115,7 +124,11 @@ export default function ProductsAdmin() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this product?')) return;
-    await supabase.from('products').delete().eq('id', id);
+    await fetch('/api/admin/products', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
     load();
   };
 
@@ -123,7 +136,16 @@ export default function ProductsAdmin() {
     if ((p.quantity ?? 0) <= 0) return;
     setSelling(p.id);
     const newQty = (p.quantity ?? 0) - 1;
-    await supabase.from('products').update({ quantity: newQty, in_stock: newQty > 0 }).eq('id', p.id);
+    await fetch('/api/admin/products', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: p.id, name_ar: p.name_ar, name_en: p.name_en,
+        description_ar: p.description_ar, description_en: p.description_en,
+        price: p.price, category_id: p.category_id, image_url: p.image_url,
+        gallery_images: p.gallery_images, quantity: newQty, in_stock: newQty > 0,
+      }),
+    });
     setSelling(null);
     load();
   };

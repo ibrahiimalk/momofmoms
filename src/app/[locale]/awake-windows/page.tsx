@@ -1,13 +1,14 @@
 export const dynamic = 'force-dynamic';
 import { Locale } from '@/lib/i18n';
-import { supabase } from '@/lib/supabase';
+import { getDb, AwakeWindow } from '@/lib/db';
 import { getContent } from '@/lib/content';
 import AwakeWindowsClient from './AwakeWindowsClient';
 
-async function getAwakeWindows() {
+async function getAwakeWindows(): Promise<AwakeWindow[]> {
   try {
-    const { data } = await supabase.from('awake_windows').select('*').order('order_index', { ascending: true });
-    return data || [];
+    const db = getDb();
+    const { results } = await db.prepare('SELECT * FROM awake_windows ORDER BY order_index ASC').all<AwakeWindow>();
+    return results || [];
   } catch { return []; }
 }
 

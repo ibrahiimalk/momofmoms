@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Product } from '@/lib/supabase';
+import { Product } from '@/lib/db';
 import { Locale } from '@/lib/i18n';
 import Image from 'next/image';
 import Link from 'next/link';

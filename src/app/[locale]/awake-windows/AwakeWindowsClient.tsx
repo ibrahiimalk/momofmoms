@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { AwakeWindow } from '@/lib/supabase';
+import { AwakeWindow } from '@/lib/db';
 import { Locale } from '@/lib/i18n';
 import Image from 'next/image';
 

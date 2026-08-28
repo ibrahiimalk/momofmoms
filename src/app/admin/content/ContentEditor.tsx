@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 type Row = { key: string; ar: string; en: string; label: string };
 
@@ -132,11 +131,15 @@ export default function ContentEditor({ initial }: { initial: Row[] }) {
     if (!row) return;
     setSaving(key);
     setError(null);
-    const supabase = createSupabaseBrowser();
-    const { error: saveError } = await supabase.from('site_content').upsert({ key, ar: row.ar, en: row.en });
+    const res = await fetch('/api/admin/content', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, ar: row.ar, en: row.en }),
+    });
     setSaving(null);
-    if (saveError) {
-      setError(`Failed to save "${key}": ${saveError.message}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(`Failed to save "${key}": ${data.error || res.statusText}`);
       return;
     }
     setSaved(s => new Set(s).add(key));

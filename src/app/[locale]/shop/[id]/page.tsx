@@ -2,18 +2,25 @@ export const dynamic = 'force-dynamic';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Locale } from '@/lib/i18n';
-import { supabase } from '@/lib/supabase';
+import { getDb, normalizeProduct } from '@/lib/db';
 import { ChevronLeft } from 'lucide-react';
 import ImageGallery from './ImageGallery';
 import AddToCartButton from './AddToCartButton';
 
 async function getProduct(id: string) {
-  const { data } = await supabase
-    .from('products')
-    .select('*, categories(id, name_ar, name_en)')
-    .eq('id', id)
-    .single();
-  return data;
+  const db = getDb();
+  const row = await db.prepare(`
+    SELECT p.*, c.id as cat_id, c.name_ar as cat_name_ar, c.name_en as cat_name_en
+    FROM products p LEFT JOIN categories c ON p.category_id = c.id
+    WHERE p.id = ?
+  `).bind(id).first<Record<string, unknown>>();
+
+  if (!row) return null;
+  const product = normalizeProduct(row);
+  if (row.cat_id) {
+    product.categories = { id: row.cat_id as string, name_ar: row.cat_name_ar as string, name_en: row.cat_name_en as string, order_index: 0, created_at: '' };
+  }
+  return product;
 }
 
 export default async function ProductPage({ params }: { params: { locale: string; id: string } }) {
