@@ -105,7 +105,9 @@ export async function POST(req: NextRequest) {
     const adminEmails = (ADMIN_EMAIL ?? 'ibrahiim.alk@gmail.com').split(',').map(e => e.trim()).filter(Boolean);
 
     // Rate limiting: max 3 orders per phone per hour
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    // SQLite CURRENT_TIMESTAMP stores "YYYY-MM-DD HH:MM:SS" (space-separated, no ms) —
+    // match that format so the string comparison in the query below actually works.
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ');
     const countRow = await db
       .prepare('SELECT COUNT(*) as count FROM orders WHERE phone = ? AND created_at >= ?')
       .bind(phone.trim(), oneHourAgo)
