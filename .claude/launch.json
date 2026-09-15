@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "momofmoms",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["-c", "PATH=/usr/local/opt/node@20/bin:$PATH exec npm run dev"],
       "port": 3000
     }
   ]
