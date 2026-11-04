@@ -16,6 +16,17 @@ export default function Footer({ locale, content }: { locale: Locale; content: R
         <p className="text-sm" style={{ color: '#A08090' }}>
           {content['footer.rights']}
         </p>
+        <p className="text-xs" style={{ color: '#A08090' }}>
+          {isRTL ? 'تصميم وتطوير ' : 'Designed & built by '}
+          <a
+            href={isRTL ? 'https://luxuryrent.it.com/' : 'https://luxuryrent.it.com/en/'}
+            target="_blank"
+            rel="noopener"
+            className="underline underline-offset-2 hover:opacity-80"
+          >
+            {isRTL ? 'لاكجيري رينت' : 'Luxury Rent'}
+          </a>
+        </p>
       </div>
     </footer>
   );
